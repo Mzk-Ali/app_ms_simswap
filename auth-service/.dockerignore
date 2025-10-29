@@ -1,0 +1,14 @@
+target/
+.git
+.idea/
+.vscode/
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+.env
+*.md
+*.iml
+out/
+node_modules/

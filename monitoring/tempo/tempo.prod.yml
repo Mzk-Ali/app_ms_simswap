@@ -1,0 +1,24 @@
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 3201
+
+distributor:
+  receivers:
+    zipkin:
+      endpoint: "0.0.0.0:9411"
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: my-tempo-traces
+      endpoint: s3.amazonaws.com
+      access_key: ${S3_ACCESS_KEY}
+      secret_key: ${S3_SECRET_KEY}
+      insecure: false
+
+compactor:
+  compaction:
+    block_retention: 7d
+    compacted_block_retention: 24h
+    max_compaction_objects: 10000

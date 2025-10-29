@@ -1,0 +1,17 @@
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 3201
+
+distributor:
+  receivers:
+    zipkin:
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/blocks
+
+compactor:
+  compaction:
+    block_retention: 24h

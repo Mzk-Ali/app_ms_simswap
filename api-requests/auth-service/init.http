@@ -1,0 +1,3 @@
+### Ping Auth Service
+GET http://localhost:4000/
+Accept: application/json

@@ -1,0 +1,8 @@
+- targets:
+    - 'auth-service:4000'
+    # - 'profile-service:9090'
+    # - 'notification-service:9090'
+    # - 'gateway:9090'
+  labels:
+    app: 'app-ms-simswap'
+    environment: 'dev'

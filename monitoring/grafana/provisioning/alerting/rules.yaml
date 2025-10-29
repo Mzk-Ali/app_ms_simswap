@@ -1,0 +1,169 @@
+# apiVersion: 1
+
+# groups:
+  # -----------------------------
+  # Infra : ressources hôte et conteneurs
+  # -----------------------------
+  # - orgId: 1
+  #   name: infra_monitoring
+  #   folder: Provisioned Alerts
+  #   interval: 60s
+  #   rules:
+  #     - uid: cpu_high
+  #       title: High CPU Usage
+  #       condition: A
+  #       data:
+  #         - refId: A
+  #           relativeTimeRange:
+  #             from: 600
+  #             to: 0
+  #           datasourceUid: DS_PROMETHEUS
+  #           model:
+  #             expr: avg by(instance) (rate(node_cpu_seconds_total{mode!="idle"}[5m])) * 100 > 0.01
+  #             intervalMs: 1000
+  #             maxDataPoints: 43200
+  #       noDataState: OK
+  #       execErrState: Error
+  #       for: 5m
+  #       annotations:
+  #         summary: "CPU élevé"
+  #         description: |
+  #           L'utilisation CPU moyenne sur 5m dépasse 80% sur {{ $labels.instance }}.
+  #           Valeur actuelle : {{ printf "%.2f" $value }}%
+  #       labels:
+  #         severity: warning
+  #         category: infra
+
+  # -----------------------------
+  # Application : santé et erreurs des microservices
+  # -----------------------------
+  # - orgId: 1
+  #   name: application.rules
+  #   folder: Provisioned Alerts
+  #   interval: 60s
+  #   rules:
+  #     - uid: authservice_down
+  #       title: auth-service indisponible
+  #       expr: up{job="auth-service"} == 0
+  #       for: 1m
+  #       labels:
+  #         severity: critical
+  #         environment: dev
+  #         service: auth-service
+  #       annotations:
+  #         summary: "Service auth-service indisponible"
+  #         description: "Le service auth-service n'est pas disponible."
+
+
+
+
+
+
+
+
+
+
+      # - uid: mem_high
+      #   title: High Memory Usage
+      #   condition: A
+      #   data:
+      #     - refId: A
+      #       relativeTimeRange:
+      #         from: 600
+      #         to: 0
+      #       datasourceUid: DS_PROMETHEUS
+      #       model:
+      #         expr: |
+      #           (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100
+      #         intervalMs: 1000
+      #   noDataState: NoData
+      #   execErrState: Error
+      #   for: 5m
+      #   annotations:
+      #     summary: "Mémoire élevée"
+      #     description: |
+      #       Mémoire utilisée >85% sur {{ $labels.instance }}.
+      #       Valeur actuelle : {{ printf "%.2f" $value }}%
+      #   labels:
+      #     severity: warning
+      #     category: infra
+
+      # - uid: disk_full
+      #   title: Disk Space Low
+      #   condition: A
+      #   data:
+      #     - refId: A
+      #       relativeTimeRange:
+      #         from: 600
+      #         to: 0
+      #       datasourceUid: DS_PROMETHEUS
+      #       model:
+      #         expr: |
+      #           100 - ((node_filesystem_free_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}) * 100)
+      #         intervalMs: 1000
+      #   noDataState: NoData
+      #   execErrState: Error
+      #   for: 5m
+      #   annotations:
+      #     summary: "Espace disque faible"
+      #     description: |
+      #       L'espace disque dépasse 90% d'utilisation sur {{ $labels.instance }} ({{ $labels.device }}).
+      #       Valeur actuelle : {{ printf "%.2f" $value }}%
+      #   labels:
+      #     severity: critical
+      #     category: infra
+
+  # - orgId: 1
+  #   name: cpu_monitoring_group
+  #   folder: Provisioned Alerts
+  #   interval: 60s
+  #   rules:
+  #     - uid: cpu_test_rule
+  #       title: Test CPU Usage
+  #       condition: A
+  #       data:
+  #         - refId: A
+  #           datasourceUid: '__expr__'
+  #           model:
+  #             expression: 1==1  # toujours vrai pour tester
+  #             type: math
+  #             intervalMs: 1000
+  #       noDataState: Alerting
+  #       execErrState: Alerting
+  #       for: 30s
+  #       annotations:
+  #         description: Test notification email
+  #       labels:
+  #         alertname: TestCPUUsage
+  #         team: devops
+  #       dashboardUid: ""
+  #       panelId: 0
+
+  # - orgId: 1
+  #   name: instance_monitoring_groups
+  #   folder: Provisioned Alerts
+  #   interval: 60s
+  #   rules:
+  #     - uid: instance_down_rule
+  #       title: InstanceDown
+  #       condition: A
+  #       data:
+  #         - refId: A
+  #           relativeTimeRange:
+  #             from: 600
+  #             to: 0
+  #           datasourceUid: DS_PROMETHEUS
+  #           model:
+  #             expr: up == 0
+  #             intervalMs: 1000
+  #             maxDataPoints: 43200
+  #             legendFormat: '{{instance}}'
+  #       noDataState: Alerting
+  #       execErrState: Error
+  #       for: 30s
+  #       annotations:
+  #         summary: "Instance down"
+  #         description: "L'instance {{ $labels.instance }} du job {{ $labels.job }} est down."
+  #       labels:
+  #         alertname: InstanceDown
+  #         severity: critical

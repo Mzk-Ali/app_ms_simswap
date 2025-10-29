@@ -1,0 +1,15 @@
+name: CI Auth Service
+
+on:
+    push:
+        paths:
+            - 'auth-service/**'
+    pull_request:
+        paths:
+            - 'auth-service/**'
+
+jobs:
+    ci:
+        uses: ./.github/workflows/reusable-ci.yml
+        with:
+            service-path: 'auth-service'

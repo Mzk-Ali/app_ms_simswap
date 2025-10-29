@@ -1,0 +1,72 @@
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${DB_AUTH_PORT}/${DB_AUTH_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - PROMETHEUS_PORT=9090
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+    ports:
+      - "4000:4000"
+    networks:
+      - default
+      - observability
+    depends_on:
+      - db
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'   # Limite l'usage CPU à 50% d'un CPU
+          memory: 512M  # Limite l'usage mémoire à 512MB
+        reservations:
+          cpus: '0.25'  # Réserve au moins 25% d'un CPU
+          memory: 256M  # Réserve au moins 256MB de mémoire
+
+  db:
+    image: postgres:18-alpine
+    container_name: sims_auth_service_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_AUTH_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_auth
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-postgres}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "${PGADMIN_PORT:-8080}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+
+    
+volumes:
+  db_data:
+  pgadmin_data:
+
+networks:
+  observability:
+    external: true
