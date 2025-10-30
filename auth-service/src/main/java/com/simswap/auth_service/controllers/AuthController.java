@@ -7,32 +7,44 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.simswap.auth_service.dtos.AuthenticationRequest;
+import com.simswap.auth_service.dtos.RefreshTokenRequest;
+import com.simswap.auth_service.dtos.RegisterRequest;
+import com.simswap.auth_service.dtos.TokensResponse;
+import com.simswap.auth_service.services.AuthService;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
+	private final AuthService authService;
 	
 	@GetMapping("")
 	public String index() {
 		return "API Auth Service fonctionne";
 	}
 	
-    private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<TokensResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    @PostMapping("/authenticate")
+    public ResponseEntity<TokensResponse> authenticate(@RequestBody AuthenticationRequest request) {
+        return ResponseEntity.ok(authService.authenticate(request));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(authService.refreshToken(request.getRefreshToken()));
+    public ResponseEntity<TokensResponse> refresh(@RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refreshToken(request));
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request) {
+    	authService.logout(request);
+    	return ResponseEntity.ok().build();
     }
 }
