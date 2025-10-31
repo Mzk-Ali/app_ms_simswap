@@ -37,14 +37,13 @@ services:
     image: grafana/tempo:latest
     container_name: tempo
     restart: unless-stopped
-    command: -config.file=/etc/tempo/tempo.dev.yml
+    command: [ "-config.file=/etc/tempo/tempo.yml" ]
     volumes:
       - ./tempo:/etc/tempo
     ports:
       - "3200:3200" # Tempo
-      - "9411:9411" # zipkin
-    environment:
-      - TEMPO_CONFIG=tempo.dev.yml
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
     networks:
       - observability
 

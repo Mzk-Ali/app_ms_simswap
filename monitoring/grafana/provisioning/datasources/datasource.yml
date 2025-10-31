@@ -42,7 +42,11 @@ datasources:
     apiVersion: 1
     jsonData:
       derivedFields:
-        -   datasourceUid: tempo
-            matcherRegex: \[.+,(.+?),
-            name: TraceID
-            url: $${__value.raw}
+        - datasourceUid: tempo
+          matcherRegex: traceId=([0-9a-f]+)
+          name: TraceID
+          url: $${__value.raw}
+        - datasourceUid: tempo
+          matcherRegex: spanId=([0-9a-f]+)
+          name: SpanID
+          url: $${__value.raw}

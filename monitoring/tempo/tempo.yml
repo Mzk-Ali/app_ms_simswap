@@ -1,0 +1,48 @@
+##############################################
+# Configuration du serveur principal Tempo
+##############################################
+server:
+  # Port HTTP utilisé pour exposer les APIs Tempo :
+  # - Requêtes de Grafana (ex : http://tempo:3200)
+  # - Health checks, endpoints REST
+  http_listen_port: 3200
+  # Port gRPC utilisé pour recevoir les traces OTLP envoyées par les applications instrumentées
+  grpc_listen_port: 3201
+
+##############################################
+# Configuration du module Distributor
+##############################################
+distributor:
+  # Liste des "receivers" : les formats de traces que Tempo peut recevoir
+  receivers:
+    otlp:
+      protocols:
+        # gRPC : version native OTLP 
+        grpc: 
+          endpoint: ":4317"
+        # HTTP : version REST
+        http: 
+          endpoint: ":4318"
+
+##############################################
+# Configuration du stockage des traces
+##############################################
+storage:
+  trace:
+    # Type de backend utilisé pour stocker les traces
+    # 'local' = sur disque local (pour dev)
+    # En production, on peut utiliser : s3, gcs, azure, etc.
+    backend: local
+    local:
+      # Emplacement des fichiers de traces stockés sur le disque du conteneur
+      path: /tmp/tempo/blocks
+      # Ces "blocks" sont des fichiers optimisés contenant des traces compressées
+
+##############################################
+# Configuration du compactor
+##############################################
+compactor:
+  compaction:
+    # Durée de rétention des traces avant suppression
+    # Ici, les traces sont conservées 24 heures avant d’être compactées/supprimées
+    block_retention: 24h

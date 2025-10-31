@@ -13,8 +13,11 @@ services:
       - JWT_EXPIRATION=${JWT_EXPIRATION}
       - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
       - PROMETHEUS_PORT=9090
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318
       - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318
+      - OTEL_SERVICE_NAME=auth-service
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
     ports:
       - "4000:4000"
     networks:

@@ -19,9 +19,11 @@ import com.simswap.auth_service.repositories.UserRepository;
 import com.simswap.auth_service.repositories.sessionRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 	private final UserRepository userRepository;
 	private final sessionRepository sessionRepository;
