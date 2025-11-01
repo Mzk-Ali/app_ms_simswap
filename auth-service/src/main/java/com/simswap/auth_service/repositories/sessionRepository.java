@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
-public interface sessionRepository extends JpaRepository<Session, Long> {
+public interface SessionRepository extends JpaRepository<Session, Long> {
 	/**
      * Trouve toutes les sessions actives (non révoquées) d’un utilisateur
      */

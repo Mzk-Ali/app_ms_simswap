@@ -16,7 +16,7 @@ import com.simswap.auth_service.entities.Role;
 import com.simswap.auth_service.entities.Session;
 import com.simswap.auth_service.entities.User;
 import com.simswap.auth_service.repositories.UserRepository;
-import com.simswap.auth_service.repositories.sessionRepository;
+import com.simswap.auth_service.repositories.SessionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthService {
 	private final UserRepository userRepository;
-	private final sessionRepository sessionRepository;
+	private final SessionRepository sessionRepository;
 	private final JwtService jwtService;
 	private final TokenService tokenService;
 	private final PasswordEncoder passwordEncoder;

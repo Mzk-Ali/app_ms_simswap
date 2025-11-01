@@ -1,7 +1,11 @@
 package com.simswap.auth_service.entities;
 
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +43,9 @@ public class User implements UserDetails {
 	
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(nullable = false, unique = true, updatable = false)
+    private String authUserId;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -70,6 +77,10 @@ public class User implements UserDetails {
     protected void onCreate() {
         createdAt = Instant.now();
         updatedAt = Instant.now();
+        
+        if (authUserId == null) {
+            authUserId = generatePublicId();
+        }
     }
 
     @PreUpdate
@@ -110,6 +121,15 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return Boolean.TRUE.equals(verified);
+    }
+    
+    private String generatePublicId() {
+        String datePart = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[4];
+        random.nextBytes(bytes);
+        String randomPart = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes).toUpperCase();
+        return String.format("AUTH-USER-%s-%s", datePart, randomPart);
     }
     
     
