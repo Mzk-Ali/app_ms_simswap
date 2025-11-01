@@ -164,7 +164,7 @@ public class PasswordService {
         userRepository.save(user);
         log.info("Mot de passe réinitialisé est sauvegardé avec succès pour l'utilisateur {}", user.getEmail());
         
-    	// Mise à jour le token comme utilisé
+    	// Mise à jour du token comme utilisé
         resetToken.setUsed(true);
         tokenRepository.save(resetToken);
         
