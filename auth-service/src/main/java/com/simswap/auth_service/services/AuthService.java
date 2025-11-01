@@ -33,8 +33,10 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager;
 	
 	public TokensResponse register(RegisterRequest request) {
+		log.info("Tentative d'inscription pour l'email: {} ...", request.getEmail());
 		// Vérifie si l'utilisateur existe déjà
 	    if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+	    	log.warn("Échec d'inscription: l'email {} est déjà utilisé !", request.getEmail());
 	        throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà !");
 	    }
 	    
@@ -46,6 +48,7 @@ public class AuthService {
 				        .build();
 	    // Sauvegarde de l'utilisateur dans la base de données
 	    userRepository.save(user);
+	    log.info("Nouvel utilisateur enregistré avec succès: {}", user.getEmail());
 	    
 	    // Génération les Tokens
 	    String jwtToken = jwtService.generateToken(user);
@@ -59,17 +62,24 @@ public class AuthService {
 	}
 
     public TokensResponse authenticate(AuthenticationRequest request) {
+    	log.info("Tentative de connexion pour: {} ...", request.getEmail());
+    	
         // Vérifie si l'email existe
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Aucun utilisateur trouvé avec cet email"));
+                .orElseThrow(() -> {
+                	log.warn("Aucun utilisateur trouvé pour {} !", request.getEmail());
+                	return new IllegalArgumentException("Aucun utilisateur trouvé avec cet email");
+                });
 
         // Vérifie si le compte est banni
         if (Boolean.TRUE.equals(user.getAccountBanned())) {
+        	log.warn("Tentative de connexion d'un compte banni: {} !", request.getEmail());
             throw new IllegalStateException("Ce compte a été banni. Contactez le support.");
         }
         
         // Vérifie si le compte est vérifié
         if (!Boolean.TRUE.equals(user.getVerified())) {
+        	log.warn("Tentative de connexion d'un compte non vérifié: {} !", request.getEmail());
             throw new IllegalStateException("Veuillez vérifier votre email avant de vous connecter.");
         }
         
@@ -82,19 +92,19 @@ public class AuthService {
                     )
             );
         } catch (Exception e) {
+        	log.warn("Échec d'authentification pour {}: Email ou mot de passe incorrect.", request.getEmail());
             throw new IllegalArgumentException("Email ou mot de passe incorrect.");
         }
-        
-//        var user = userRepository.findByEmail(request.getEmail())
-//                .orElseThrow();
         
         // Génération les Tokens
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        log.debug("Tokens générés pour {} !", user.getEmail());
         
         // Mis à jour de la dernière connexion
         user.setLastLoginAt(Instant.now());
         userRepository.save(user);
+        log.info("Dernière connexion mise à jour pour {} !", user.getEmail());
         
         Session session = sessionRepository
         		.findByUserAndDeviceName(user, request.getDeviceName())
@@ -111,8 +121,9 @@ public class AuthService {
         session.setExpiresAt(LocalDateTime.now().plusDays(7));
         session.setRevoked(false);
         sessionRepository.save(session);
-//        revokeAllUserTokens(user);
-//        saveUserToken(user, jwtToken);
+        log.info("Session enregistrée pour l'utilisateur {} depuis le device: {} !", 
+	            user.getEmail(), request.getDeviceName());
+
         return TokensResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
@@ -120,10 +131,15 @@ public class AuthService {
     }
     
     public TokensResponse refreshToken(RefreshTokenRequest request) {
+    	log.info("Tentative de rafraîchissement de token pour le device: {} ...", request.getDeviceName());
+    	
     	// Verifie si l'utilisateur existe
     	String username = jwtService.extractUsername(request.getRefreshToken());
     	User user = userRepository.findByEmail(username)
-    	    .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+    	    .orElseThrow(() -> {
+    	    	log.warn("Aucun utilisateur trouvé pour {}", username);
+    	    	return new IllegalArgumentException("Utilisateur introuvable");
+    	    });
 
     	// Vérifie si le refresh token lié à l'utilisateur est valide ou non
     	Session session = sessionRepository
@@ -131,10 +147,14 @@ public class AuthService {
     		    .stream()
     		    .filter(s -> tokenService.matches(request.getRefreshToken(), s.getRefreshTokenHash()))
     		    .findFirst()
-    		    .orElseThrow(() -> new IllegalArgumentException("Refresh token invalide."));
+    		    .orElseThrow(() -> {
+    		    	log.warn("Refresh token invalide pour {} !", user.getEmail());
+    		    	return new IllegalArgumentException("Refresh token invalide.");
+    		    });
 
     	// Vérifie si le refresh token est expiré
     	if (session.isExpired()) {
+    		log.warn("Session expirée pour {} !", user.getEmail());
     		session.revoke();
     		sessionRepository.save(session);
     	    throw new IllegalStateException("Session expiré. Veuillez vous reconnecter.");
@@ -144,17 +164,20 @@ public class AuthService {
     	if (!session.getIpAddress().equals(request.getIpAddress()) ||
 			!session.getUserAgent().equals(request.getUserAgent()) ||
 			!session.getDeviceName().equals(request.getDeviceName())) {
+    		log.error("Incohérence détectée entre la session et l'environnement actuel pour {}", user.getEmail());
     		throw new SecurityException("Incohérence détectée entre la session et l'environnement actuel.");
     	}
 
     	// Génération les Tokens
     	String newRefreshToken = jwtService.generateRefreshToken(user);
     	String newAccessToken = jwtService.generateToken(user);
+    	log.debug("Nouveaux tokens générés pour {} !", user.getEmail());
 
     	session.setRefreshTokenHash(tokenService.hashToken(newRefreshToken));
     	session.setLastUsedAt(LocalDateTime.now());
     	// Persistance de la nouvelle session
     	sessionRepository.save(session);
+    	log.info("Session rafraîchie avec succès pour {} !", user.getEmail());
 
     	return TokensResponse.builder()
     		    .accessToken(newAccessToken)
@@ -163,10 +186,14 @@ public class AuthService {
     }
     
     public void logout(RefreshTokenRequest request) {
+    	log.info("Tentative de déconnexion pour le device: {} ...", request.getDeviceName());
     	// Verifie si l'utilisateur existe
     	String username = jwtService.extractUsername(request.getRefreshToken());
     	User user = userRepository.findByEmail(username)
-        	    .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+        	    .orElseThrow(() -> {
+        	    	log.warn("Aucun utilisateur trouvé pour {}", username);
+        	    	return new IllegalArgumentException("Utilisateur introuvable");
+        	    });
     	
     	sessionRepository.findByUserAndIsRevokedFalse(user)
     		.stream()
@@ -176,6 +203,7 @@ public class AuthService {
     		.ifPresent(session -> {
     			session.revoke();
     			sessionRepository.save(session);
+    			log.info("Session révoquée pour l'utilisateur {} sur le device {} !", user.getEmail(), request.getDeviceName());
     		});
     }
 }
