@@ -27,6 +27,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,10 +53,14 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true, updatable = false)
     private String authUserId;
 
+    @Email(message = "Email invalide")
+    @NotBlank(message = "L'email est obligatoire")
+    @Size(max = 255, message = "L'email ne doit pas dépasser 255 caractères")
     @Column(nullable = false, unique = true)
     private String email;
     
     @JsonIgnore
+    @NotBlank(message = "Le mot de passe est obligatoire")
     private String password;
     
     @Builder.Default
@@ -61,10 +71,14 @@ public class User implements UserDetails {
     @Column(name = "is_account_banned", nullable = false)
     private Boolean accountBanned = false;
     
+    @PastOrPresent(message = "La date de création ne peut pas être dans le futur")
     private Instant createdAt;
+    @PastOrPresent(message = "La date de mise à jour ne peut pas être dans le futur")
     private Instant updatedAt;
+    @PastOrPresent(message = "La date de dernière connexion ne peut pas être dans le futur")
     private Instant lastLoginAt;
     
+    @NotNull(message = "Le rôle est obligatoire")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
