@@ -16,7 +16,6 @@ import com.simswap.auth_service.dtos.RegisterRequest;
 import com.simswap.auth_service.dtos.TokensResponse;
 import com.simswap.auth_service.dtos.VerifyEmailRequest;
 import com.simswap.auth_service.entities.EmailVerificationToken;
-import com.simswap.auth_service.entities.PasswordResetToken;
 import com.simswap.auth_service.entities.Role;
 import com.simswap.auth_service.entities.Session;
 import com.simswap.auth_service.entities.User;

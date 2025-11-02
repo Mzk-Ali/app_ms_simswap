@@ -143,6 +143,11 @@
 	                        <version>1.18.42</version>
 	                    </path>
 	                </annotationProcessorPaths>
+					<compilerArgs>
+						<arg>-parameters</arg>
+						<arg>-processor</arg>
+						<arg>lombok.launch.AnnotationProcessorHider$AnnotationProcessor</arg>
+					</compilerArgs>
 	            </configuration>
 	        </plugin>
 			<plugin>
