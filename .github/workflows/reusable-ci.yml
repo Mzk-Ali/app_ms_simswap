@@ -37,9 +37,7 @@ jobs:
                     --file pom.xml \
                     -DskipTests \
                     -Dsonar.projectKey=${{ github.repository }}-${{ inputs.service-path }} \
-                    -Dsonar.host.url=https://sonarcloud.io \
-                    -Dsonar.login=$SONAR_TOKEN
-            
+                    -Dsonar.host.url=https://sonarcloud.io
             - name: Build and Test Service
               run: |
                 cd ${{ inputs.service-path }}
