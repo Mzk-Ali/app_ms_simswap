@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.simswap.auth_service.repositories.UserRepository;
 import com.simswap.auth_service.services.JwtService;
 import com.simswap.auth_service.services.TokenService;
 
@@ -21,7 +22,7 @@ class AuthServiceApplicationTests {
 
         @Bean
         public AuthenticationManager authenticationManager() {
-            return email -> null;
+            return mock(AuthenticationManager.class);
         }
 
         @Bean
@@ -37,6 +38,11 @@ class AuthServiceApplicationTests {
         @Bean
         public PasswordEncoder passwordEncoder() {
             return mock(PasswordEncoder.class);
+        }
+
+        @Bean
+        public UserRepository userRepository() {
+            return mock(UserRepository.class);
         }
     }
 
