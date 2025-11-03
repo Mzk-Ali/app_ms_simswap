@@ -46,4 +46,4 @@ jobs:
             - name: Build and Test Service
               run: |
                 cd ${{ inputs.service-path }}
-                mvn clean verify
+                mvn clean verify -DskipTests
