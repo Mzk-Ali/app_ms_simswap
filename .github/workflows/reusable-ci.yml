@@ -36,8 +36,9 @@ jobs:
                 mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar jacoco:check \
                     --file pom.xml \
                     -DskipTests \
-                    -Dsonar.projectKey=Mzk-Ali_app_ms_simswap \
-                    -Dsonar.host.url=https://sonarcloud.io
+                    -Dsonar.projectKey=${{ github.repository }}-${{ inputs.service-path }} \
+                    -Dsonar.host.url=https://sonarcloud.io \
+                    -Dsonar.token=$SONAR_TOKEN
             - name: Build and Test Service
               run: |
                 cd ${{ inputs.service-path }}
