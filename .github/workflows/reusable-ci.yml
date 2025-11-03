@@ -6,6 +6,10 @@ on:
             service-path:
                 required: true
                 type: string
+        secrets:
+          SONAR_TOKEN:
+            required: true
+            description: "SonarCloud authentication token"
             
 jobs:
     ci:
