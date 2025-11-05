@@ -21,6 +21,13 @@ scrape_configs:
   #     - files:
   #       - '/etc/prometheus/file_sd_configs/app_ms_simswap.yml'
 
+  - job_name: 'gateway_service'
+    metrics_path: 'actuator/prometheus'
+    static_configs:
+      - targets: ['gateway-service:8888']
+      - labels:
+          application: 'Gateway Service Application'
+
   - job_name: 'auth_service'
     metrics_path: 'actuator/prometheus'
     static_configs:
