@@ -150,16 +150,32 @@ services:
       - redis_data:/data
     networks:
       - default
+      - observability
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"
+    environment:
+      - REDIS_HOST=redis-gateway
+      - REDIS_PORT=6379
+    volumes:
+      - redis_insight_data:/db
+    depends_on:
+      - redis-gateway
+    networks:
+      - default
     
 volumes:
   db_data:
   pgadmin_data:
   redis_data:
+  redis_insight_data:
 
 networks:
   observability:

@@ -1,5 +1,7 @@
 package com.simswap.gateway_service;
 
+import java.util.Optional;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -10,17 +12,21 @@ import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @RestController
 @SpringBootApplication
 @EnableDiscoveryClient
+@Slf4j
 public class GatewayServiceApplication {
 	
-	public static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.run(GatewayServiceApplication.class, args);
     }
 	
@@ -35,11 +41,11 @@ public class GatewayServiceApplication {
     /**
      * Rate limiter Redis configuration
      */
-    @Bean
-    public RedisRateLimiter redisRateLimiter() {
-        // 5 requêtes par seconde, burst max 10
-        return new RedisRateLimiter(5, 10);
-    }
+//     @Bean
+//     public RedisRateLimiter redisRateLimiter() {
+//          5 requêtes par seconde, burst max 10
+//         return new RedisRateLimiter(5, 10);
+//     }
 
     /**
      * Définition des routes dynamiques + custom statiques
@@ -55,15 +61,16 @@ public class GatewayServiceApplication {
                                         .setName("docsCircuitBreaker")
                                         .setFallbackUri("forward:/fallback"))
                         )
-                        .uri("https://spring.io")) // exemple externe
+                        .uri("https://spring.io"))
                 // Exemple de route interne via service Eureka
                 .route("auth_service", r -> r.path("/api/v1/auth/**")
                         .filters(f -> f
                                 .rewritePath("/api/v1/auth/(?<segment>.*)", "/${segment}")
-                                .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter()))
+//                                .requestRateLimiter(config -> config.setRateLimiter(redisRateLimiter()))
                                 .circuitBreaker(c -> c.setName("authCB").setFallbackUri("forward:/fallback"))
                         )
                         .uri("lb://auth-service"))
+                .route("auth_service_docs", r -> r.path("/auth-service/v3/api-docs").and().method(HttpMethod.GET).uri("lb://auth-service"))
                 .build();
     }
 
@@ -84,13 +91,45 @@ public class GatewayServiceApplication {
     /**
      * KeyResolver (IP-based) pour le rate limiter
      */
+//     @Bean
+//     @Primary
+//     public KeyResolver ipKeyResolver() {
+//         return exchange -> Mono.just(
+//                 exchange.getRequest()
+//                         .getRemoteAddress()
+//                         .getAddress()
+//                         .getHostAddress()
+//         );
+//     }
+        @Bean
+        @Primary
+        public KeyResolver ipKeyResolver() {
+        return exchange -> {
+                String ip = Optional.ofNullable(exchange.getRequest().getRemoteAddress())
+                                .map(addr -> addr.getAddress().getHostAddress())
+                                .orElse("unknown-ip");
+                log.info("RateLimiter Key: {}", ip);
+                return Mono.just(ip);
+        };
+        }
+
+    /**
+     * KeyResolver (Email-based) pour le rate limiter
+     */
     @Bean
-    public KeyResolver ipKeyResolver() {
-        return exchange -> Mono.just(
-                exchange.getRequest()
-                        .getRemoteAddress()
-                        .getAddress()
-                        .getHostAddress()
-        );
+    public KeyResolver ipAndEmailKeyResolver() {
+        return exchange -> {
+            String ip = Optional.ofNullable(exchange.getRequest().getRemoteAddress())
+                    .map(addr -> addr.getAddress().getHostAddress())
+                    .orElse("unknown-ip");
+
+            String email = Optional.ofNullable(
+                    exchange.getRequest().getHeaders().getFirst("X-User-Email")
+            ).orElse("unknown-email");
+
+            // Combine les deux (clé unique pour IP+email)
+            String combinedKey = ip + ":" + email.toLowerCase();
+            return Mono.just(combinedKey);
+        };
     }
 }
