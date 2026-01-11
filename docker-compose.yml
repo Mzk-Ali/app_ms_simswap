@@ -41,6 +41,7 @@ services:
       # - SPRING_DATASOURCE_USERNAME=${DB_USER}
       # - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       # - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=${JWT_SECRET}
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
       - SPRING_DATA_REDIS_TIMEOUT=${REDIS_TIMEOUT}
@@ -56,8 +57,10 @@ services:
       - default
       - observability
     depends_on:
-      - discovery-service
-      - redis-gateway
+      discovery-service:
+        condition: service_started
+      redis-gateway:
+        condition: service_healthy
     env_file:
       - .env
     deploy:
