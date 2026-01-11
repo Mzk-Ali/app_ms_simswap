@@ -1,10 +1,86 @@
 services:
+  discovery-service:
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    container_name: discovery-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_SERVICE_NAME=discovery-service
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
+    ports:
+      - "8761:8761"
+    networks:
+      - default
+      - observability
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'   # Limite l'usage CPU à 50% d'un CPU
+          memory: 512M  # Limite l'usage mémoire à 512MB
+        reservations:
+          cpus: '0.25'  # Réserve au moins 25% d'un CPU
+          memory: 256M  # Réserve au moins 256MB de mémoire
+  gateway-service:
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_APPLICATION_NAME=gateway-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:${DISCOVERY_PORT}/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      # - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${DB_GATEWAY_PORT}/${DB_GATEWAY_NAME}
+      # - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      # - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      # - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
+      - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+      - SPRING_DATA_REDIS_TIMEOUT=${REDIS_TIMEOUT}
+      - PROMETHEUS_PORT=8080
+      - LOKI_URL=${LOKI_URL}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_SERVICE_NAME=gateway-service
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
+    ports:
+      - "${GATEWAY_PORT}:8888"
+    networks:
+      - default
+      - observability
+    depends_on:
+      discovery-service:
+        condition: service_started
+      redis-gateway:
+        condition: service_healthy
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'   # Limite l'usage CPU à 50% d'un CPU
+          memory: 512M  # Limite l'usage mémoire à 512MB
+        reservations:
+          cpus: '0.25'  # Réserve au moins 25% d'un CPU
+          memory: 256M  # Réserve au moins 256MB de mémoire
+
   auth-service:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
+    container_name: auth-service
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:${DISCOVERY_PORT}/eureka/
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${DB_AUTH_PORT}/${DB_AUTH_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
@@ -13,17 +89,18 @@ services:
       - JWT_EXPIRATION=${JWT_EXPIRATION}
       - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
       - PROMETHEUS_PORT=9090
-      - LOKI_URL=http://loki:3100/loki/api/v1/push
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318
+      - LOKI_URL=${LOKI_URL}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
       - OTEL_SERVICE_NAME=auth-service
       - OTEL_METRICS_EXPORTER=none
       - OTEL_TRACES_EXPORTER=otlp
     ports:
-      - "4000:4000"
+      - "${AUTH_SERVICE_PORT}:4000"
     networks:
       - default
       - observability
     depends_on:
+      - discovery-service
       - db
     env_file:
       - .env
@@ -46,10 +123,9 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${DB_AUTH_PORT}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin_auth
@@ -67,11 +143,42 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-
+  redis-gateway:
+    image: redis:7.4-alpine
+    container_name: gateway_redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
+      - observability
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"
+    environment:
+      - REDIS_HOST=redis-gateway
+      - REDIS_PORT=6379
+    volumes:
+      - redis_insight_data:/db
+    depends_on:
+      - redis-gateway
+    networks:
+      - default
     
 volumes:
   db_data:
   pgadmin_data:
+  redis_data:
+  redis_insight_data:
 
 networks:
   observability:

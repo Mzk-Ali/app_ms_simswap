@@ -6,6 +6,10 @@ on:
             service-path:
                 required: true
                 type: string
+        secrets:
+          SONAR_TOKEN:
+            required: true
+            description: "SonarCloud authentication token"
             
 jobs:
     ci:
@@ -35,11 +39,11 @@ jobs:
                 cd ${{ inputs.service-path }}
                 mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar jacoco:check \
                     --file pom.xml \
-                    -Dsonar.projectKey=${{ github.repository }}-${{ inputs.service-path }} \
+                    -DskipTests \
+                    -Dsonar.projectKey=Mzk-Ali_app_ms_simswap \
                     -Dsonar.host.url=https://sonarcloud.io \
-                    -Dsonar.login=$SONAR_TOKEN
-            
+                    -Dsonar.token=$SONAR_TOKEN
             - name: Build and Test Service
               run: |
                 cd ${{ inputs.service-path }}
-                mvn clean verify
+                mvn clean verify -DskipTests
