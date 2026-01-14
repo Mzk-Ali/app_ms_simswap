@@ -10,9 +10,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.simswap.auth_service.dtos.ApiResponse;
 import com.simswap.auth_service.dtos.AuthenticationRequest;
 import com.simswap.auth_service.dtos.RefreshTokenRequest;
 import com.simswap.auth_service.dtos.RegisterRequest;
+import com.simswap.auth_service.dtos.RegisterResponse;
 import com.simswap.auth_service.dtos.TokensResponse;
 import com.simswap.auth_service.dtos.VerifyEmailRequest;
 import com.simswap.auth_service.entities.EmailVerificationToken;
@@ -44,7 +46,7 @@ public class AuthService {
      * @param request RegisterRequest contenant :
      *                - email : email de l'utilisateur
      *                - password : mot de passe choisi
-     * @return void
+     * @return ApiResponse<RegisterResponse>
      *
      * Étapes :
      * 1. Vérifie si l'email est déjà utilisé.
@@ -53,7 +55,7 @@ public class AuthService {
      * 4. Sauvegarde l'utilisateur et le token dans la base.
      * 5. (TODO) Envoi du token par email à l'utilisateur.
      */
-	public void register(RegisterRequest request) {
+	public ApiResponse<RegisterResponse> register(RegisterRequest request) {
 		log.info("Tentative d'inscription pour l'email: {} ...", request.getEmail());
 		// Vérifie si l'utilisateur existe déjà
 	    if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -88,6 +90,18 @@ public class AuthService {
 	    // TODO : envoie email avec ce token (via EmailService)
 	    
 	    log.info("Token de vérification généré pour {} : {}", user.getEmail(), verificationToken);
+	    
+	    RegisterResponse response = RegisterResponse.builder()
+	            .email(user.getEmail())
+	            .message("Inscription réussie ! Un email de vérification vous a été envoyé.")
+	            .build();
+	    
+	    return ApiResponse.<RegisterResponse>builder()
+	            .status(201)
+	            .success(true)
+	            .message("Inscription réussie")
+	            .data(response)
+	            .build();
 	}
 
 	/**
@@ -97,7 +111,7 @@ public class AuthService {
      *                - email : email de connexion
      *                - password : mot de passe
      *                - deviceName, userAgent, ipAddress : informations sur le device
-     * @return TokensResponse contenant :
+     * @return ApiResponse<TokensResponse> contenant :
      *                - accessToken : JWT
      *                - refreshToken : token de rafraîchissement
      *
@@ -108,14 +122,14 @@ public class AuthService {
      * 4. Génère un access token et refresh token.
      * 5. Met à jour la dernière connexion et enregistre ou met à jour la session.
      */
-    public TokensResponse authenticate(AuthenticationRequest request) {
+    public ApiResponse<TokensResponse> authenticate(AuthenticationRequest request) {
     	log.info("Tentative de connexion pour: {} ...", request.getEmail());
     	
         // Vérifie si l'email existe
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                 	log.warn("Aucun utilisateur trouvé pour {} !", request.getEmail());
-                	return new IllegalArgumentException("Aucun utilisateur trouvé avec cet email");
+                	return new IllegalArgumentException("Email ou mot de passe incorrect");
                 });
 
         // Vérifie si le compte est banni
@@ -203,9 +217,18 @@ public class AuthService {
         log.info("Session enregistrée pour l'utilisateur {} depuis le device: {} !", 
 	            user.getEmail(), request.getDeviceName());
 
-        return TokensResponse.builder()
+        TokensResponse tokens = TokensResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .expiresIn(86400)
+                .tokenType("Bearer")
+                .build();
+        
+        return ApiResponse.<TokensResponse>builder()
+                .status(200)
+                .success(true)
+                .message("Authentification réussie")
+                .data(tokens)
                 .build();
     }
     
@@ -215,7 +238,7 @@ public class AuthService {
      * @param request RefreshTokenRequest contenant :
      *                - refreshToken : token de rafraîchissement
      *                - deviceName, userAgent, ipAddress : informations sur le device
-     * @return TokensResponse contenant :
+     * @return ApiResponse<TokensResponse> contenant :
      *                - accessToken : nouveau JWT
      *                - refreshToken : nouveau refresh token
      *
@@ -225,7 +248,7 @@ public class AuthService {
      * 3. Vérifie la cohérence device/userAgent/ip.
      * 4. Génère de nouveaux tokens et met à jour la session.
      */
-    public TokensResponse refreshToken(RefreshTokenRequest request) {
+    public ApiResponse<TokensResponse> refreshToken(RefreshTokenRequest request) {
     	log.info("Tentative de rafraîchissement de token pour le device: {} ...", request.getDeviceName());
     	
     	// Verifie si l'utilisateur existe
@@ -274,10 +297,19 @@ public class AuthService {
     	sessionRepository.save(session);
     	log.info("Session rafraîchie avec succès pour {} !", user.getEmail());
 
-    	return TokensResponse.builder()
-    		    .accessToken(newAccessToken)
-    		    .refreshToken(newRefreshToken)
-    		    .build();
+    	TokensResponse tokens = TokensResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .expiresIn(86400)
+                .tokenType("Bearer")
+                .build();
+        
+        return ApiResponse.<TokensResponse>builder()
+                .status(200)
+                .success(true)
+                .message("Token rafraîchi avec succès")
+                .data(tokens)
+                .build();
     }
     
     /**
@@ -286,14 +318,14 @@ public class AuthService {
      * @param request RefreshTokenRequest contenant :
      *                - refreshToken : token de rafraîchissement
      *                - deviceName, userAgent, ipAddress : informations sur le device
-     * @return void
+     * @return ApiResponse<Void>
      *
      * Étapes :
      * 1. Vérifie que l'utilisateur existe.
      * 2. Cherche la session correspondant au refresh token et device.
      * 3. Révoque la session et la sauvegarde.
      */
-    public void logout(RefreshTokenRequest request) {
+    public ApiResponse<Void> logout(RefreshTokenRequest request) {
     	log.info("Tentative de déconnexion pour le device: {} ...", request.getDeviceName());
     	// Verifie si l'utilisateur existe
     	String username = jwtService.extractUsername(request.getRefreshToken());
@@ -313,6 +345,12 @@ public class AuthService {
     			sessionRepository.save(session);
     			log.info("Session révoquée pour l'utilisateur {} sur le device {} !", user.getEmail(), request.getDeviceName());
     		});
+    	
+    	return ApiResponse.<Void>builder()
+    	        .status(200)
+                .success(true)
+                .message("Déconnexion réussie")
+                .build();
     }
     
     /**
@@ -320,7 +358,7 @@ public class AuthService {
      *
      * @param request VerifyEmailRequest contenant :
      *                - verifyEmailToken : token de vérification
-     * @return void
+     * @return ApiResponse<Void>
      *
      * Étapes :
      * 1. Récupère le token valide (non utilisé et existant).
@@ -329,7 +367,7 @@ public class AuthService {
      * 4. Marque l'utilisateur comme vérifié.
      * 5. Marque le token comme utilisé pour éviter toute réutilisation.
      */
-    public void verifyEmail(VerifyEmailRequest request) {
+    public ApiResponse<Void> verifyEmail(VerifyEmailRequest request) {
     	String token = request.getVerifyEmailToken();
     	log.info("Début de la vérification de l'email avec le token : {}", token);
     	
@@ -371,5 +409,11 @@ public class AuthService {
         log.info("Token {} marqué comme utilisé pour l'utilisateur {}", token, user.getEmail());
 
         log.info("Email vérifié pour l'utilisateur {}", user.getEmail());
+        
+        return ApiResponse.<Void>builder()
+                .status(200)
+                .success(true)
+                .message("Email vérifié avec succès ! Vous pouvez maintenant vous connecter.")
+                .build();
     }
 }

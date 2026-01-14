@@ -1,5 +1,6 @@
 package com.simswap.auth_service.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,15 +8,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.simswap.auth_service.dtos.ApiResponse;
 import com.simswap.auth_service.dtos.AuthenticationRequest;
 import com.simswap.auth_service.dtos.RefreshTokenRequest;
 import com.simswap.auth_service.dtos.RegisterRequest;
+import com.simswap.auth_service.dtos.RegisterResponse;
 import com.simswap.auth_service.dtos.TokensResponse;
 import com.simswap.auth_service.dtos.VerifyEmailRequest;
 import com.simswap.auth_service.services.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "Authentication", description = "Endpoints pour la gestion de l'authentification, inscription et sessions utilisateur")
@@ -36,7 +40,7 @@ public class AuthController {
      * @param request RegisterRequest contenant :
      *                - email : email de l'utilisateur
      *                - password : mot de passe
-     * @return ResponseEntity<Void> : HTTP 200 OK si succès
+     * @return ResponseEntity<RegisterResponse> : HTTP 200 OK si succès
      * 
      * @throws IllegalArgumentException si l'utilisateur existe déjà
      */
@@ -59,9 +63,9 @@ public class AuthController {
 	    		- Aucun JWT ou authentification n’est nécessaire pour cette opération
 	    """
 	)
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
-        authService.register(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        ApiResponse<RegisterResponse> response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -107,8 +111,10 @@ public class AuthController {
 	    		- L’endpoint renvoie un JWT + un refresh token si l’authentification réussit
 	    """
 	)
-    public ResponseEntity<TokensResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(authService.authenticate(request));
+    public ResponseEntity<ApiResponse<TokensResponse>> authenticate(@Valid @RequestBody AuthenticationRequest request) {
+        ApiResponse<TokensResponse> response = authService.authenticate(request);
+        
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -145,8 +151,10 @@ public class AuthController {
 	    		- En cas d'incohérence device/userAgent/IP, une erreur de sécurité est renvoyée
 	    """
 	)
-    public ResponseEntity<TokensResponse> refresh(@RequestBody RefreshTokenRequest request) {
-        return ResponseEntity.ok(authService.refreshToken(request));
+    public ResponseEntity<ApiResponse<TokensResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        ApiResponse<TokensResponse> response = authService.refreshToken(request);
+        
+        return ResponseEntity.ok(response);
     }
     
     /**
@@ -182,9 +190,10 @@ public class AuthController {
 	    		- Aucune authentification JWT n'est nécessaire pour cette opération
 	    """
 	)
-    public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request) {
-    	authService.logout(request);
-    	return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        ApiResponse<Void> response = authService.logout(request);
+        
+        return ResponseEntity.ok(response);
     }
     
     /**
@@ -218,8 +227,9 @@ public class AuthController {
 	    		- Seule la session du device concerné est invalidée, les autres restent actives
 	    """
 	)
-    public ResponseEntity<Void> verifyEmail(@RequestBody VerifyEmailRequest request) {
-        authService.verifyEmail(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        ApiResponse<Void> response = authService.verifyEmail(request);
+        
+        return ResponseEntity.ok(response);
     }
 }

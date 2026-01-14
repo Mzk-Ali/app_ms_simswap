@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.simswap.auth_service.dtos.ApiResponse;
 import com.simswap.auth_service.dtos.ChangePasswordRequest;
+import com.simswap.auth_service.dtos.PasswordResponse;
 import com.simswap.auth_service.dtos.RequestPasswordResetRequest;
 import com.simswap.auth_service.dtos.ResetPasswordRequest;
 import com.simswap.auth_service.services.PasswordService;
@@ -31,7 +33,7 @@ public class PasswordController {
      *                - oldPassword : ancien mot de passe
      *                - newPassword : nouveau mot de passe
      *                - confirmNewPassword : confirmation du nouveau mot de passe
-     * @return ResponseEntity<Void> : HTTP 204 No Content si succès
+     * @return ResponseEntity<ApiResponse<Void>> : HTTP 200 si succès
      * 
      * @throws IllegalArgumentException si :
      *         - les nouveaux mots de passe ne correspondent pas
@@ -59,9 +61,9 @@ public class PasswordController {
 	            - Nécessite que l'utilisateur soit déjà authentifié (authUserId fourni par le frontend)
 	    """
 	)
-	public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
-		passwordService.changePassword(request);
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<ApiResponse<Void>> changePassword(@RequestBody ChangePasswordRequest request) {
+	    ApiResponse<Void> response = passwordService.changePassword(request);
+	    return ResponseEntity.status(response.getStatus()).body(response);
 	}
 	
 	/**
@@ -70,7 +72,7 @@ public class PasswordController {
      *
      * @param request RequestPasswordResetRequest contenant :
      *                - email : email de l'utilisateur
-     * @return ResponseEntity<Void> : HTTP 204 No Content si succès
+     * @return ResponseEntity<ApiResponse<Void>> : HTTP 202 Accepted si succès
      * 
      * @throws IllegalArgumentException si l'utilisateur avec cet email n'existe pas
      */
@@ -93,9 +95,9 @@ public class PasswordController {
 	            - Aucun JWT n'est requis pour cette opération
 	    """
 	)
-    public ResponseEntity<Void> requestPasswordReset(@RequestBody RequestPasswordResetRequest request) {
-        passwordService.requestPasswordReset(request);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiResponse<PasswordResponse>> requestPasswordReset(@RequestBody RequestPasswordResetRequest request) {
+        ApiResponse<PasswordResponse> response = passwordService.requestPasswordReset(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
     
     /**
@@ -105,7 +107,7 @@ public class PasswordController {
      *                - resetToken : token reçu par email
      *                - newPassword : nouveau mot de passe
      *                - confirmNewPassword : confirmation du mot de passe
-     * @return ResponseEntity<Void> : HTTP 204 No Content si succès
+     * @return ResponseEntity<ApiResponse<Void>> : HTTP 200 si succès
      * 
      * @throws IllegalArgumentException si les mots de passe ne correspondent pas ou si le token est invalide
      * @throws IllegalStateException si le token est expiré
@@ -129,8 +131,8 @@ public class PasswordController {
 	            - Aucune authentification JWT n’est nécessaire pour cette opération
 	    """
 	)
-    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
-        passwordService.resetPassword(request);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        ApiResponse<Void> response = passwordService.resetPassword(request);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 }

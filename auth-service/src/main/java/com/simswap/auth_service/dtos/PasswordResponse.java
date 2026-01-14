@@ -3,13 +3,13 @@ package com.simswap.auth_service.dtos;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @AllArgsConstructor
-public class TokensResponse {
-	private String accessToken;
-    private String refreshToken;
-    private int expiresIn;
-    private String tokenType;
+@NoArgsConstructor
+public class PasswordResponse {
+    private String email;
+    private String message;
 }

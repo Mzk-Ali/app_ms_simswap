@@ -7,7 +7,9 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.simswap.auth_service.dtos.ApiResponse;
 import com.simswap.auth_service.dtos.ChangePasswordRequest;
+import com.simswap.auth_service.dtos.PasswordResponse;
 import com.simswap.auth_service.dtos.RequestPasswordResetRequest;
 import com.simswap.auth_service.dtos.ResetPasswordRequest;
 import com.simswap.auth_service.entities.PasswordResetToken;
@@ -35,7 +37,7 @@ public class PasswordService {
      *                - oldPassword : ancien mot de passe
      *                - newPassword : nouveau mot de passe
      *                - confirmNewPassword : confirmation du nouveau mot de passe
-     * @return void
+     * @return ApiResponse<Void>
      *
      * Étapes :
      * 1. Vérifie que le nouveau mot de passe et la confirmation correspondent.
@@ -43,7 +45,7 @@ public class PasswordService {
      * 3. Vérifie que l'ancien mot de passe fourni est correct.
      * 4. Encode et met à jour le mot de passe dans la base de données.
      */
-	public void changePassword(ChangePasswordRequest request) {
+	public ApiResponse<Void> changePassword(ChangePasswordRequest request) {
 		log.info("Début de la demande de changement de mot de passe pour l'utilisateur ID : {}", request.getAuthUserId());
 		
 		// Vérifie les nouveaux mots de passe
@@ -72,6 +74,12 @@ public class PasswordService {
         userRepository.save(user);
 
         log.info("Mot de passe mis à jour avec succès pour {} !", user.getEmail());
+        
+        return ApiResponse.<Void>builder()
+                .status(200)
+                .success(true)
+                .message("Votre mot de passe a été modifié avec succès.")
+                .build();
 	}
 	
 	/**
@@ -79,7 +87,7 @@ public class PasswordService {
      *
      * @param request RequestPasswordResetRequest contenant :
      *                - email : email de l'utilisateur
-     * @return void
+     * @return ApiResponse<PasswordResponse>
      *
      * Étapes :
      * 1. Récupère l'utilisateur à partir de son email.
@@ -88,7 +96,7 @@ public class PasswordService {
      * 4. Sauvegarde le token dans la base de données.
      * 5. Génère le lien de réinitialisation et le prépare pour l'envoi par email.
      */
-	public void requestPasswordReset(RequestPasswordResetRequest request) {
+	public ApiResponse<PasswordResponse> requestPasswordReset(RequestPasswordResetRequest request) {
 		log.info("Demande d'un token de reset password pour {} ...", request.getEmail());
 		
 		User user = userRepository.findByEmail(request.getEmail())
@@ -120,6 +128,18 @@ public class PasswordService {
         // Envoi vers EmailService via Kafka
         
         log.info("Lien de réinitialisation envoyé à {}", user.getEmail());
+        
+        PasswordResponse response = PasswordResponse.builder()
+                .email(user.getEmail())
+                .message("Un lien de réinitialisation est envoyé à l'email : " + user.getEmail())
+                .build();
+        
+        return ApiResponse.<PasswordResponse>builder()
+                .status(202)
+                .success(true)
+                .message("Un lien de réinitialisation est envoyé à l'email : " + user.getEmail())
+                .data(response)
+                .build();
 	}
 	
 	/**
@@ -129,7 +149,7 @@ public class PasswordService {
      *                - resetToken : token reçu par email
      *                - newPassword : nouveau mot de passe
      *                - confirmNewPassword : confirmation du nouveau mot de passe
-     * @return void
+     * @return ApiResponse<Void>
      *
      * Étapes :
      * 1. Récupère le token de réinitialisation valide (non utilisé et existant).
@@ -138,7 +158,7 @@ public class PasswordService {
      * 4. Encode et met à jour le mot de passe dans la base de données.
      * 5. Marque le token comme utilisé pour éviter toute réutilisation.
      */
-	public void resetPassword(ResetPasswordRequest request) {
+	public ApiResponse<Void> resetPassword(ResetPasswordRequest request) {
 		log.info("Demande de réinitialisation de mot de passe POST-EMAIL avec le token : {} ...", request.getResetToken());
 		
 		PasswordResetToken resetToken = tokenRepository.findByTokenAndUsedFalse(request.getResetToken())
@@ -169,5 +189,11 @@ public class PasswordService {
         tokenRepository.save(resetToken);
         
         log.info("Mot de passe réinitialisé pour l'utilisateur {}", user.getEmail());
+        
+        return ApiResponse.<Void>builder()
+                .status(200)
+                .success(true)
+                .message("Votre mot de passe a été réinitialisé avec succès.")
+                .build();
 	}
 }
