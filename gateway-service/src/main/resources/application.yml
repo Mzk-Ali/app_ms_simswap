@@ -6,27 +6,26 @@ spring:
       timeout: ${SPRING_DATA_REDIS_TIMEOUT:2000ms}
   cloud:
     gateway:
-    # Configuration CORS globale
-#      globalcors:
-#        cors-configurations:
-#          '[/**]':
-#            allowedOrigins:
-#              - "http://localhost:3000"
-#              - "http://localhost:4200"
-#            allowedMethods:
-#              - GET
-#              - POST
-#              - PUT
-#              - DELETE
-#              - OPTIONS
-#              - PATCH
-#            allowedHeaders:
-#              - "*"
-#            exposedHeaders:
-#              - Authorization
-#              - Content-Type
-#            allowCredentials: true
-#            maxAge: 3600
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - Authorization
+              - Content-Type
+            allowCredentials: true
+            maxAge: 3600
 
       routes:
         - id: auth_login
@@ -97,6 +96,28 @@ spring:
           predicates:
             - Path=/auth-service/v3/api-docs/**
             - Method=GET
+        - id: global_auth_post_limiter
+          uri: lb://auth-service
+          predicates:
+            - Method=POST
+            - Path=/api/v1/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+        - id: global_auth_get_limiter
+          uri: lb://auth-service
+          predicates:
+            - Method=GET
+            - Path=/api/v1/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
 
 # Configuration Resilience4j Circuit Breaker
 resilience4j:

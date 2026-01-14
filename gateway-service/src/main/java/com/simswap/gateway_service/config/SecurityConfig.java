@@ -2,6 +2,7 @@ package com.simswap.gateway_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -10,6 +11,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
 import com.simswap.gateway_service.filter.JwtAuthenticationFilter;
+
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +29,13 @@ public class SecurityConfig {
 		return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(auth -> auth
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(
                     		"/api/v1/auth/authenticate",
                     		"/api/v1/auth/register",
+                    		"/api/v1/auth/refresh-token",
+                    		"/api/v1/auth/request-password-reset",
+                    		"/api/v1/auth/reset-password",
                     		"/swagger-ui.html",
                     		"/swagger-ui/**",
                             "/v3/api-docs/**",
@@ -57,29 +63,4 @@ public class SecurityConfig {
                 )
                 .build();
     }
-
-
-//    @Bean
-//    public AuthenticationWebFilter jwtAuthenticationWebFilter(
-//    		JwtReactiveAuthenticationManager authManager,
-//    		JwtServerAuthenticationConverter converter
-//    ) {
-//        AuthenticationWebFilter filter = new AuthenticationWebFilter(authManager);
-//        filter.setServerAuthenticationConverter(converter);
-//        filter.setRequiresAuthenticationMatcher(
-//            new NegatedServerWebExchangeMatcher(
-//                ServerWebExchangeMatchers.pathMatchers(
-//                    "/api/v1/auth/authenticate",
-//                    "/api/v1/auth/authenticate/**",
-//                    "/api/v1/auth/register",
-//                    "/swagger-ui.html",
-//                    "/swagger-ui/**",
-//                    "/v3/api-docs/**",
-//                    "/auth-service/v3/api-docs",
-//                    "/actuator/**"
-//                )
-//            )
-//        );
-//        return filter;
-//    }
 }

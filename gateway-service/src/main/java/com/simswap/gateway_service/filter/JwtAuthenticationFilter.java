@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,6 +42,12 @@ public class JwtAuthenticationFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
+        HttpMethod method = request.getMethod();
+        
+        if (HttpMethod.OPTIONS.equals(method)) {
+            log.debug("OPTIONS request detected, skipping JWT validation: {}", path);
+            return chain.filter(exchange);
+        }
         
         // Skip JWT validation for public paths
         if (isPublicPath(path)) {
