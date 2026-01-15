@@ -6,12 +6,27 @@ spring:
       timeout: ${SPRING_DATA_REDIS_TIMEOUT:2000ms}
   cloud:
     gateway:
+      default-filters:
+        - AddResponseHeader=X-Content-Type-Options, nosniff
+        - AddResponseHeader=X-Frame-Options, DENY
+        - AddResponseHeader=Referrer-Policy, strict-origin-when-cross-origin
+        - AddResponseHeader=Permissions-Policy, geolocation=(), camera=(), microphone=()
+        - AddResponseHeader=Content-Security-Policy, >
+            default-src 'self';
+            script-src 'self';
+            style-src 'self' 'unsafe-inline';
+            img-src 'self' data:;
+            font-src 'self';
+            connect-src 'self' ${FRONTEND_URL:http://localhost:4200} http://localhost:4200;
+            frame-ancestors 'none';
+            object-src 'none';
+            base-uri 'self';
       globalcors:
         cors-configurations:
           '[/**]':
             allowedOrigins:
               - "http://localhost:3000"
-              - "http://localhost:4200"
+              - ${FRONTEND_URL:http://localhost:4200}
             allowedMethods:
               - GET
               - POST

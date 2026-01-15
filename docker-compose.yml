@@ -33,6 +33,7 @@ services:
       dockerfile: Dockerfile
     container_name: gateway-service
     environment:
+      - FRONTEND_URL=${FRONTEND_URL}
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - SPRING_APPLICATION_NAME=gateway-service
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:${DISCOVERY_PORT}/eureka/
