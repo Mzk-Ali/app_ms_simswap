@@ -39,10 +39,12 @@ public class SecurityConfig {
                     		"/swagger-ui.html",
                     		"/swagger-ui/**",
                             "/v3/api-docs/**",
+                            "/*/v3/api-docs/**",
                             "/auth-service/v3/api-docs",
                             "/actuator/**" 
                     	).permitAll()
                         .pathMatchers("/api/v1/auth/logout").authenticated()
+                        .pathMatchers("/api/v1/subscriptions/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())

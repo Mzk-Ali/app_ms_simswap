@@ -10,6 +10,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -61,7 +63,6 @@ public class JwtAuthenticationFilter implements WebFilter {
         // No token provided
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             log.debug("Pas de token JWT trouvé pour: {}", path);
-            // Let Spring Security handle this - it will return 401 if needed
             return chain.filter(exchange);
         }
         
@@ -93,8 +94,14 @@ public class JwtAuthenticationFilter implements WebFilter {
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
             
             // Continue with authenticated context
+//            return chain.filter(exchange)
+//                    .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+            
+            SecurityContext securityContext =
+                    new SecurityContextImpl(authentication);
+
             return chain.filter(exchange)
-                    .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+                    .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
             
         } catch (Exception e) {
             log.error("Erreur lors du traitement du token JWT: {}", e.getMessage(), e);
