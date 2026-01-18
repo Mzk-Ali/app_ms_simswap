@@ -82,7 +82,7 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:${DISCOVERY_PORT}/eureka/
       - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:${DB_AUTH_PORT}/${DB_AUTH_NAME}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${DB_AUTH_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
@@ -113,7 +113,6 @@ services:
         reservations:
           cpus: '0.25'  # Réserve au moins 25% d'un CPU
           memory: 256M  # Réserve au moins 256MB de mémoire
-
   db:
     image: postgres:18-alpine
     container_name: sims_auth_service_db
@@ -127,6 +126,60 @@ services:
       - "${DB_AUTH_PORT}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+
+  subscription-service:
+    build:
+      context: ./subscription-service
+      dockerfile: Dockerfile
+    container_name: subscription-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-subscription:5432/${DB_SUB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_SUB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_SUB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - PROMETHEUS_PORT=9090
+      - LOKI_URL=${LOKI_URL}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_SERVICE_NAME=subscription-service
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL}
+    ports:
+      - "${SUB_SERVICE_PORT}:4001"
+    networks:
+      - default
+      - observability
+    depends_on:
+      - discovery-service
+      - db-subscription
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'   # Limite l'usage CPU à 50% d'un CPU
+          memory: 512M  # Limite l'usage mémoire à 512MB
+        reservations:
+          cpus: '0.25'  # Réserve au moins 25% d'un CPU
+          memory: 256M  # Réserve au moins 256MB de mémoire
+  db-subscription:
+    image: postgres:18-alpine
+    container_name: sims_subscription_service_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_SUB_NAME}
+      POSTGRES_USER: ${DB_SUB_USER}
+      POSTGRES_PASSWORD: ${DB_SUB_PASSWORD}
+    ports:
+      - "${DB_SUB_PORT}:5432"
+    volumes:
+      - db_sub_data:/var/lib/postgresql/data
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin_auth
@@ -144,6 +197,7 @@ services:
     restart: unless-stopped
     depends_on:
       - db
+      - db-subscription
   redis-gateway:
     image: redis:7.4-alpine
     container_name: gateway_redis
@@ -177,6 +231,7 @@ services:
     
 volumes:
   db_data:
+  db_sub_data:
   pgadmin_data:
   redis_data:
   redis_insight_data:
