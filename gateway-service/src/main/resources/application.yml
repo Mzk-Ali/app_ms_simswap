@@ -115,7 +115,7 @@ spring:
           uri: lb://auth-service
           predicates:
             - Method=POST
-            - Path=/api/v1/**
+            - Path=/api/v1/auth/**
           filters:
             - name: RequestRateLimiter
               args:
@@ -126,7 +126,50 @@ spring:
           uri: lb://auth-service
           predicates:
             - Method=GET
-            - Path=/api/v1/**
+            - Path=/api/v1/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                
+        - id: subscription_service_catch_all
+          uri: lb://subscription-service
+          predicates:
+            - Path=/api/v1/subscriptions/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+            - name: CircuitBreaker
+              args:
+                name: SubscriptionServiceCircuitBreaker
+                fallbackUri: forward:/fallback/subscription
+        - id: sub_docs
+          uri: lb://subscription-service
+          predicates:
+            - Path=/subscription-service/v3/api-docs/**
+            - Method=GET
+        - id: global_sub_post_limiter
+          uri: lb://subscription-service
+          predicates:
+            - Method=POST
+            - Path=/api/v1/subscriptions/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+        - id: global_sub_get_limiter
+          uri: lb://subscription-service
+          predicates:
+            - Method=GET
+            - Path=/api/v1/subscriptions/**
           filters:
             - name: RequestRateLimiter
               args:
@@ -187,7 +230,16 @@ resilience4j:
         waitDurationInOpenState: 5s
         failureRateThreshold: 50
         eventConsumerBufferSize: 10
-  
+        
+      SubscriptionServiceCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
   # Configuration Resilience4j Time Limiter
   timelimiter:
     instances:
@@ -200,6 +252,8 @@ resilience4j:
       authLogoutCircuitBreaker:
         timeoutDuration: 3s
       authServiceCircuitBreaker:
+        timeoutDuration: 3s
+      SubscriptionServiceCircuitBreaker:
         timeoutDuration: 3s
 
 springdoc:
@@ -217,3 +271,6 @@ springdoc:
       - url: /auth-service/v3/api-docs
         name: Auth Service
         primaryName: Auth Service
+      - url: /subscription-service/v3/api-docs
+        name: Subscription Service
+        primaryName: Subscription Service

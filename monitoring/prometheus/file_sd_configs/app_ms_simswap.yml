@@ -1,5 +1,6 @@
 - targets:
     - 'auth-service:4000'
+    - 'subscription-service:4001'
     # - 'profile-service:9090'
     # - 'notification-service:9090'
     # - 'gateway:9090'
