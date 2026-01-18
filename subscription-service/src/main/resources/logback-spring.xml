@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <!-- JMX pour la supervision -->
+    <jmxConfigurator/>
+
+    <!-- Inclure la configuration de base de Spring Boot -->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <!-- Récupérer le nom de l'application depuis spring.application.name -->
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <springProperty scope="context" name="fileLogPattern" source="logging.pattern.console"/>
+
+    <!-- Appender Loki -->
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>http://loki:3100/loki/api/v1/push</url>
+        </http>
+        <format>
+            <label>
+                <pattern>application=${appName},host=${HOSTNAME},level=%level</pattern>
+            </label>
+            <message>
+                <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSX} [%thread] [${appName}] [traceId=%X{traceId:-},spanId=%X{spanId:-}] %msg%n</pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <!-- Appender console pour toujours voir les logs localement -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${fileLogPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Log root -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="LOKI"/>
+    </root>
+</configuration>
+
