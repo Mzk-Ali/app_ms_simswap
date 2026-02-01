@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #fdfaf6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 1px solid #ffcfd1;
+        }
+        .header {
+            background-color: #ffcfd1;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            color: #4a4a4a;
+            font-size: 32px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+            color: #4a4a4a;
+        }
+        .content h2 {
+            color: #f3c6f1;
+            margin-bottom: 20px;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 16px 36px;
+            background-color: #f3c6f1;
+            color: #4a4a4a !important;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(243, 198, 241, 0.4);
+        }
+        .footer {
+            background-color: #ffe1bc;
+            padding: 25px;
+            text-align: center;
+            font-size: 13px;
+            color: #7d7d7d;
+        }
+        .no-reply {
+            margin-top: 10px;
+            display: block;
+            color: #d98b8b;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .divider {
+            height: 4px;
+            background: linear-gradient(to right, #ffcfd1, #f3c6f1, #ffe1bc);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="divider"></div>
+
+        <div class="header">
+            <h1>FaceSwap</h1>
+        </div>
+
+        <div class="content">
+            <h2>Bienvenue à bord !</h2>
+            <p>
+                Merci de nous avoir rejoint. Pour activer votre compte FaceSwap et commencer à explorer nos contenus, 
+                cliquez simplement sur le bouton ci-dessous :
+            </p>
+            <div style="margin: 30px 0;">
+	            <a th:href="${verificationUrl}" 
+                    target="_blank"
+                    style="background-color: #f3c6f1; border-radius: 50px; color: #4a4a4a; display: inline-block; font-family: sans-serif; font-size: 16px; font-weight: bold; line-height: 50px; text-align: center; text-decoration: none; width: 250px; -webkit-text-size-adjust: none;">
+	                Vérifier mon compte
+	            </a>
+            </div>
+
+            <p style="margin-top: 40px; font-size: 14px; color: #a0a0a0;">
+                Si vous n'êtes pas à l'origine de cette inscription, vous pouvez ignorer cet email en toute sécurité.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p><strong>© 2026 FaceSwap.</strong> Tous droits réservés.</p>
+            <span class="no-reply">Ceci est un message automatique, merci de ne pas y répondre.</span>
+        </div>
+    </div>
+</body>
+</html>

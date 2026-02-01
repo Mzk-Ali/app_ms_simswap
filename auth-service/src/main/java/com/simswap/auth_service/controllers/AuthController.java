@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,6 +15,7 @@ import com.simswap.auth_service.dtos.RefreshTokenRequest;
 import com.simswap.auth_service.dtos.RegisterRequest;
 import com.simswap.auth_service.dtos.RegisterResponse;
 import com.simswap.auth_service.dtos.TokensResponse;
+import com.simswap.auth_service.dtos.UserResponse;
 import com.simswap.auth_service.dtos.VerifyEmailRequest;
 import com.simswap.auth_service.services.AuthService;
 
@@ -230,6 +232,15 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         ApiResponse<Void> response = authService.verifyEmail(request);
         
+        return ResponseEntity.ok(response);
+    }
+    
+    
+    
+    @GetMapping("/me")
+    @Operation(summary = "Récupérer les informations de l'utilisateur connecté")
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(@RequestHeader("X-User-Email") String email) {
+        ApiResponse<UserResponse> response = authService.getCurrentUser(email);
         return ResponseEntity.ok(response);
     }
 }

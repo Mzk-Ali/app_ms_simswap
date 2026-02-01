@@ -42,6 +42,13 @@ scrape_configs:
       - labels:
           application: 'Subscription Service Application'
 
+  - job_name: 'email_service'
+    metrics_path: 'actuator/prometheus'
+    static_configs:
+      - targets: ['email-service:4004']
+      - labels:
+          application: 'Email Service Application'
+
 #   - job_name: "fake_service"
 #     static_configs:
 #       - targets: ["fake-service:1234"]

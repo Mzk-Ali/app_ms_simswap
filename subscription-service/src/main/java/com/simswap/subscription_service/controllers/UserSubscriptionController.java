@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,10 +45,10 @@ public class UserSubscriptionController {
     }
     
     @PostMapping("/subscribe")
-    public ResponseEntity<ApiResponse<SubscribeResponse>> subscribe(@Valid @RequestBody SubscribeRequest request)
+    public ResponseEntity<ApiResponse<SubscribeResponse>> subscribe(@Valid @RequestBody SubscribeRequest request, @RequestHeader("X-User-Email") String email)
     {
         log.info("Test");
-        ApiResponse<SubscribeResponse> response = subscriptionService.subscribe(request);
+        ApiResponse<SubscribeResponse> response = subscriptionService.subscribe(email, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     

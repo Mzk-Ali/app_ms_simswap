@@ -95,14 +95,25 @@ services:
       - OTEL_SERVICE_NAME=auth-service
       - OTEL_METRICS_EXPORTER=none
       - OTEL_TRACES_EXPORTER=otlp
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - RABBIT_EXCHANGE_NAME=${RABBIT_EXCHANGE_NAME}
+      - RABBIT_ROUTING_KEY=${RABBIT_ROUTING_KEY}
+      - RABBIT_QUEUE_NAME=${RABBIT_QUEUE_NAME}
     ports:
       - "${AUTH_SERVICE_PORT}:4000"
     networks:
       - default
       - observability
     depends_on:
-      - discovery-service
-      - db
+      discovery-service:
+        condition: service_started
+      db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     env_file:
       - .env
     deploy:
@@ -226,6 +237,71 @@ services:
       - redis_insight_data:/db
     depends_on:
       - redis-gateway
+    networks:
+      - default
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    container_name: email-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - EUREKA_INSTANCE_PREFER_IP_ADDRESS=true
+      - PROMETHEUS_PORT=9090
+      - LOKI_URL=${LOKI_URL}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_SERVICE_NAME=email-service
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+      - RABBIT_EXCHANGE_NAME=${RABBIT_EXCHANGE_NAME}
+      - RABBIT_ROUTING_KEY=${RABBIT_ROUTING_KEY}
+      - RABBIT_QUEUE_NAME=${RABBIT_QUEUE_NAME}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+    ports:
+      - "${EMAIL_SERVICE_PORT}:4004"
+    networks:
+      - default
+      - observability
+    depends_on:
+      discovery-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'   # Limite l'usage CPU à 50% d'un CPU
+          memory: 512M  # Limite l'usage mémoire à 512MB
+        reservations:
+          cpus: '0.25'  # Réserve au moins 25% d'un CPU
+          memory: 256M  # Réserve au moins 256MB de mémoire
+  rabbitmq:
+    image: rabbitmq:3.11-management-alpine
+    container_name: rabbitmq
+    env_file:
+      - .env
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - default
     

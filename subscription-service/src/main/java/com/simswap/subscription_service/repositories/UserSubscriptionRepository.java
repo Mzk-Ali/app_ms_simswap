@@ -9,7 +9,7 @@ import com.simswap.subscription_service.entities.UserSubscription;
 
 @Repository
 public interface UserSubscriptionRepository extends JpaRepository<UserSubscription, Long> {
-    Optional<UserSubscription> findActiveSubscriptionByUserId(String userId);
+    Optional<UserSubscription> findActiveSubscriptionByUserId(String email);
     
     Optional<UserSubscription> findByStripeSubscriptionId(String stripeSubscriptionId);
 }

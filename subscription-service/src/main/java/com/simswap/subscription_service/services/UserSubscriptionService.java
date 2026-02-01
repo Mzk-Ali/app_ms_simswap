@@ -51,7 +51,7 @@ public class UserSubscriptionService {
                 .build();
     }
     
-    public ApiResponse<SubscribeResponse> subscribe(SubscribeRequest request) {
+    public ApiResponse<SubscribeResponse> subscribe(String email, SubscribeRequest request) {
         String userId = request.getUserId();
         Long planId = request.getPlanId();
 

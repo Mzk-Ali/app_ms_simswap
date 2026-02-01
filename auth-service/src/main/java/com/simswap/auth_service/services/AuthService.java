@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,11 +17,13 @@ import com.simswap.auth_service.dtos.RefreshTokenRequest;
 import com.simswap.auth_service.dtos.RegisterRequest;
 import com.simswap.auth_service.dtos.RegisterResponse;
 import com.simswap.auth_service.dtos.TokensResponse;
+import com.simswap.auth_service.dtos.UserResponse;
 import com.simswap.auth_service.dtos.VerifyEmailRequest;
 import com.simswap.auth_service.entities.EmailVerificationToken;
 import com.simswap.auth_service.entities.Role;
 import com.simswap.auth_service.entities.Session;
 import com.simswap.auth_service.entities.User;
+import com.simswap.auth_service.publishers.EmailPublisher;
 import com.simswap.auth_service.repositories.UserRepository;
 import com.simswap.auth_service.repositories.EmailVerificationTokenRepository;
 import com.simswap.auth_service.repositories.SessionRepository;
@@ -39,6 +42,10 @@ public class AuthService {
 	private final TokenService tokenService;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authenticationManager;
+	private final EmailPublisher emailPublisher;
+	
+	@Value("${app.frontend.verify-url}")
+    private String verifyBaseUrl;
 	
 	/**
      * Inscrit un nouvel utilisateur dans le système.
@@ -86,8 +93,9 @@ public class AuthService {
 	    emailVerificationRepository.save(emailVerifToken);
 	    log.info("Nouvel utilisateur créé (non vérifié): {}", user.getEmail());
 	    
-	    
-	    // TODO : envoie email avec ce token (via EmailService)
+	    String verificationUrl = verifyBaseUrl + "?token=" + verificationToken;
+	    log.info("URL de vérification Token : {}", verificationUrl);
+	    emailPublisher.sendRegistrationEmail(user.getEmail(), verificationToken, verificationUrl);
 	    
 	    log.info("Token de vérification généré pour {} : {}", user.getEmail(), verificationToken);
 	    
@@ -99,7 +107,7 @@ public class AuthService {
 	    return ApiResponse.<RegisterResponse>builder()
 	            .status(201)
 	            .success(true)
-	            .message("Inscription réussie")
+	            .message("Inscription réussie ! Un email de vérification vous a été envoyé.")
 	            .data(response)
 	            .build();
 	}
@@ -414,6 +422,27 @@ public class AuthService {
                 .status(200)
                 .success(true)
                 .message("Email vérifié avec succès ! Vous pouvez maintenant vous connecter.")
+                .build();
+    }
+    
+    public ApiResponse<UserResponse> getCurrentUser(String email) {
+        log.info("Début de la récupération d'informations de l'utilisateur : {}" , email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+
+        UserResponse userDto = UserResponse.builder()
+                .id(user.getId())
+                .authUserId(user.getAuthUserId())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .createdAt(user.getCreatedAt())
+                .build();
+
+        return ApiResponse.<UserResponse>builder()
+                .status(200)
+                .success(true)
+                .message("Profil récupéré")
+                .data(userDto)
                 .build();
     }
 }

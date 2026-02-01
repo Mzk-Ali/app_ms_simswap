@@ -97,10 +97,13 @@ public class JwtAuthenticationFilter implements WebFilter {
 //            return chain.filter(exchange)
 //                    .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
             
-            SecurityContext securityContext =
-                    new SecurityContextImpl(authentication);
+            SecurityContext securityContext = new SecurityContextImpl(authentication);
+            
+            ServerWebExchange mutatedExchange = exchange.mutate()
+                    .request(builder -> builder.header("X-User-Email", username))
+                    .build();
 
-            return chain.filter(exchange)
+            return chain.filter(mutatedExchange)
                     .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
             
         } catch (Exception e) {
