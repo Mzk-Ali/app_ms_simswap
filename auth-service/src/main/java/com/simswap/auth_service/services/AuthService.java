@@ -97,7 +97,7 @@ public class AuthService {
 	    log.info("URL de vérification Token : {}", verificationUrl);
 	    emailPublisher.sendRegistrationEmail(user.getEmail(), verificationToken, verificationUrl);
 	    
-	    log.info("Token de vérification généré pour {} avec token : {}", user.getEmail(), verificationToken);
+	    log.info("Token de vérification généré pour {} : {}", user.getEmail(), verificationToken);
 	    
 	    RegisterResponse response = RegisterResponse.builder()
 	            .email(user.getEmail())
