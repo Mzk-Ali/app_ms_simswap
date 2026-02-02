@@ -4,16 +4,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.simswap.subscription_service.dtos.ApiResponse;
 import com.simswap.subscription_service.services.SubscriptionWebhookService;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +34,7 @@ public class SubscriptionWebhookController {
         Event event;
         try {
             event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
-        } catch (Exception e) {
+        } catch (SignatureVerificationException e) {
             log.error("La verification du Webhook signature a échouée : {}", e.getMessage());
             throw new IllegalArgumentException("Signature invalide !");
         }
