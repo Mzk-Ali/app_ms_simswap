@@ -61,3 +61,4 @@ jobs:
                 service: 'auth-service'
                 image-tag: ${{ steps.extract.outputs.image_tag }}
                 latest-tag: ${{ steps.extract.outputs.latest_tag }}
+                ref: ${{ github.event.workflow_run.head_sha }}
