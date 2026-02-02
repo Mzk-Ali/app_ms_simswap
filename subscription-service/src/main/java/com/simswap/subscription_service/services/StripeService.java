@@ -58,8 +58,8 @@ public class StripeService {
             Payment payment = Payment.builder()
                     .userId(request.getUserId())
                     .userSubscription(subscription)
-//                    .amount(plan.getPrice())
-//                    .currency(plan.getCurrency())
+                    .amount(plan.getPriceAmount())
+                    .currency(plan.getCurrency())
                     .status(PaymentStatus.PENDING)
                     .description("Abonnement " + plan.getName())
                     .build();

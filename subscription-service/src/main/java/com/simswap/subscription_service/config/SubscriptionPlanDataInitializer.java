@@ -1,5 +1,7 @@
 package com.simswap.subscription_service.config;
 
+import java.math.BigDecimal;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,9 @@ public class SubscriptionPlanDataInitializer {
                                 .durationType("WEEK")
                                 .durationValue(1)
                                 .simswapLimit(5)
+                                .priceAmount(BigDecimal.valueOf(1.29))
+                                .currency("EUR")
+                                .stripePriceId("price_1SwNBr04d4Y2hAFKyVOvM0dm")
                                 .isActive(true)
                                 .build()
                 );
@@ -34,6 +39,9 @@ public class SubscriptionPlanDataInitializer {
                                 .durationType("MONTH")
                                 .durationValue(1)
                                 .simswapLimit(20)
+                                .priceAmount(BigDecimal.valueOf(9.99))
+                                .currency("EUR")
+                                .stripePriceId("price_1SwNCd04d4Y2hAFKqtqOl51W")
                                 .isActive(true)
                                 .build()
                 );
@@ -47,6 +55,9 @@ public class SubscriptionPlanDataInitializer {
                                 .durationType("YEAR")
                                 .durationValue(1)
                                 .simswapLimit(300)
+                                .priceAmount(BigDecimal.valueOf(89.99))
+                                .currency("EUR")
+                                .stripePriceId("price_1SwNCd04d4Y2hAFKqtqOl51W")
                                 .isActive(true)
                                 .build()
                 );

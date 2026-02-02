@@ -1,6 +1,6 @@
 services:
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.48.1
     container_name: prometheus
     restart: unless-stopped
     ports:
@@ -13,7 +13,7 @@ services:
       - observability
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.3.1
     container_name: grafana
     restart: unless-stopped
     env_file:
@@ -34,7 +34,7 @@ services:
       - tempo
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.4.1
     container_name: tempo
     restart: unless-stopped
     command: [ "-config.file=/etc/tempo/tempo.yml" ]
@@ -48,7 +48,7 @@ services:
       - observability
 
   loki:
-    image: grafana/loki:main
+    image: grafana/loki:2.9.4
     container_name: loki
     command: [ "-config.file=/etc/loki/local-config.yaml" ]
     ports:
@@ -57,7 +57,7 @@ services:
       - observability
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:v1.7.0
     container_name: node-exporter
     restart: unless-stopped
     ports:

@@ -1,5 +1,6 @@
 package com.simswap.subscription_service.entities;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import jakarta.persistence.Column;
@@ -41,6 +42,13 @@ public class SubscriptionPlan {
     private Integer simswapLimit;
 
     private String stripePriceId;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal priceAmount;
+
+    @Builder.Default
+    @Column(nullable = false, length = 3)
+    private String currency = "EUR";
 
     @Builder.Default
     @Column(nullable = false)

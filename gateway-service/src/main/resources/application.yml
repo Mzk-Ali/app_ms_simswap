@@ -244,17 +244,17 @@ resilience4j:
   timelimiter:
     instances:
       authAuthenticateCircuitBreaker:
-        timeoutDuration: 3s
+        timeoutDuration: 10s
       authRegisterCircuitBreaker:
-        timeoutDuration: 3s
+        timeoutDuration: 10s
       authRefreshCircuitBreaker:
-        timeoutDuration: 3s
+        timeoutDuration: 10s
       authLogoutCircuitBreaker:
-        timeoutDuration: 3s
+        timeoutDuration: 10s
       authServiceCircuitBreaker:
-        timeoutDuration: 3s
+        timeoutDuration: 10s
       SubscriptionServiceCircuitBreaker:
-        timeoutDuration: 3s
+        timeoutDuration: 10s
 
 springdoc:
   enable-native-support: true
