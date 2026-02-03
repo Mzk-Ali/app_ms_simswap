@@ -53,6 +53,7 @@ public class EmailService {
         Context context = new Context();
 
         if (emailRequest.getDynamicValue() != null) {
+        	log.info("Variables dynamiques reçues: {}", emailRequest.getDynamicValue());
             emailRequest.getDynamicValue().forEach(context::setVariable);
         }
 

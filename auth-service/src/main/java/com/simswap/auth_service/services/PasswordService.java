@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import com.simswap.auth_service.dtos.RequestPasswordResetRequest;
 import com.simswap.auth_service.dtos.ResetPasswordRequest;
 import com.simswap.auth_service.entities.PasswordResetToken;
 import com.simswap.auth_service.entities.User;
+import com.simswap.auth_service.publishers.EmailPublisher;
 import com.simswap.auth_service.repositories.PasswordResetTokenRepository;
 import com.simswap.auth_service.repositories.UserRepository;
 
@@ -28,6 +30,10 @@ public class PasswordService {
 	private final UserRepository userRepository;
 	private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailPublisher emailPublisher;
+    
+    @Value("${app.frontend.reset-password-url}")
+    private String resetPasswordBaseUrl;
 	
     /**
      * Change le mot de passe d'un utilisateur existant.
@@ -125,7 +131,9 @@ public class PasswordService {
         String resetLink = "https://ton-frontend.com/reset-password?token=" + token;
         log.debug("Lien de réinitialisation généré : {}", resetLink);
         
-        // Envoi vers EmailService via Kafka
+        String resetPasswordUrl = resetPasswordBaseUrl + "/" + token;
+	    log.info("URL de réinitialisation de mot de passe : {}", resetPasswordUrl);
+	    emailPublisher.sendForgotPasswordEmail(user.getEmail(), token, resetPasswordUrl);
         
         log.info("Lien de réinitialisation envoyé à {}", user.getEmail());
         

@@ -1,5 +1,6 @@
 package com.simswap.subscription_service.repositories;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ public interface UserSubscriptionRepository extends JpaRepository<UserSubscripti
     Optional<UserSubscription> findActiveSubscriptionByUserId(String email);
     
     Optional<UserSubscription> findByStripeSubscriptionId(String stripeSubscriptionId);
+    
+    List<UserSubscription> findByUserIdOrderByCreatedAtDesc(String userId);
 }

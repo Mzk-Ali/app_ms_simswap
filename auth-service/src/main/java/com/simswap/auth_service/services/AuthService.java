@@ -93,7 +93,7 @@ public class AuthService {
 	    emailVerificationRepository.save(emailVerifToken);
 	    log.info("Nouvel utilisateur créé (non vérifié): {}", user.getEmail());
 	    
-	    String verificationUrl = verifyBaseUrl + "?token=" + verificationToken;
+	    String verificationUrl = verifyBaseUrl + "/" + verificationToken;
 	    log.info("URL de vérification Token : {}", verificationUrl);
 	    emailPublisher.sendRegistrationEmail(user.getEmail(), verificationToken, verificationUrl);
 	    

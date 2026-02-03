@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .pathMatchers(
                     		"/api/v1/auth/authenticate",
                     		"/api/v1/auth/register",
+                    		"/api/v1/auth/verify-email",
                     		"/api/v1/auth/refresh-token",
                     		"/api/v1/auth/request-password-reset",
                     		"/api/v1/auth/reset-password",

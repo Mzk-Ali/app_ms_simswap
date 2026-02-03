@@ -40,4 +40,22 @@ public class EmailPublisher {
         log.info("Publication du message RabbitMQ pour l'email : {}", email);
         rabbitTemplate.convertAndSend(exchange, routingKey, request);
     }
+    
+    public void sendForgotPasswordEmail(String email, String token, String resetPasswordUrl) {
+    	Map<String, Object> model = Map.of(
+            "userName", email,
+            "token", token,
+            "link", resetPasswordUrl
+        );
+        
+        EmailRequest request = EmailRequest.builder()
+                .to(email)
+                .subject("Réinitialisation du mot de passe")
+                .templateName("forgot-password")
+                .dynamicValue(model)
+                .build();
+        
+        log.info("Publication du message RabbitMQ pour l'email : {}", email);
+        rabbitTemplate.convertAndSend(exchange, routingKey, request);
+    }
 }
