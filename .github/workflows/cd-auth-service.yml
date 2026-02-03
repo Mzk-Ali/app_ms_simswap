@@ -7,19 +7,16 @@ on:
             - completed
 
 jobs:
-    cd:
+    prepare:
         if: |
             github.event.workflow_run.conclusion == 'success' &&
             (github.event.workflow_run.head_branch == 'main' ||
             github.event.workflow_run.head_branch == 'dev' ||
             startsWith(github.event.workflow_run.head_branch, 'release/'))
         runs-on: ubuntu-latest
-
-        permissions: 
-            contents: read
-            packages: write
-            actions: read
-
+        outputs:
+            image_tag: ${{ steps.extract.outputs.image_tag }}
+            latest_tag: ${{ steps.extract.outputs.latest_tag }}
         steps:
             - name: Extract branch name and generate tag
               id: extract
@@ -31,39 +28,34 @@ jobs:
                 if [[ "$BRANCH_NAME" == "dev" ]]; then
                     IMAGE_TAG="dev-${{ github.run_number }}"
                     LATEST_TAG="dev"
-
                 elif [[ "$BRANCH_NAME" == "main" ]]; then
                     IMAGE_TAG="prod-${{ github.run_number }}"
                     LATEST_TAG="prod"
-
                 elif [[ "$BRANCH_NAME" == release/* ]]; then
                     RELEASE_NAME="${BRANCH_NAME#release/}"
                     IMAGE_TAG="staging-${RELEASE_NAME}-${{ github.run_number }}"
                     LATEST_TAG="staging"
-
                 elif [[ "$BRANCH_NAME" == feature/* ]]; then
                     FEATURE_NAME="${BRANCH_NAME#feature/}"
                     IMAGE_TAG="feat-${FEATURE_NAME}-${{ github.run_number }}"
-
                 elif [[ "$BRANCH_NAME" == fix/* ]]; then
                     FIX_NAME="${BRANCH_NAME#fix/}"
                     IMAGE_TAG="fix-${FIX_NAME}-${{ github.run_number }}"
-                
                 else
                     IMAGE_TAG="build-${{ github.run_number }}"
                 fi
 
-                echo "Using image tag: $IMAGE_TAG"
                 echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
-
                 if [[ -n "$LATEST_TAG" ]]; then
-                echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+                    echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
                 fi
 
-            - name: Call Reusable CD Workflow
-              uses: ./.github/workflows/reusable-cd.yml
-              with:
-                service: 'auth-service'
-                image-tag: ${{ steps.extract.outputs.image_tag }}
-                latest-tag: ${{ steps.extract.outputs.latest_tag }}
-                ref: ${{ github.event.workflow_run.head_sha }}
+    call-reusable-cd:
+        needs: prepare
+        uses: ./.github/workflows/reusable-cd.yml
+        with:
+            service: 'auth-service'
+            image-tag: ${{ needs.prepare.outputs.image_tag }}
+            latest-tag: ${{ needs.prepare.outputs.latest_tag }}
+            ref: ${{ github.event.workflow_run.head_sha }}
+        secrets: inherit
