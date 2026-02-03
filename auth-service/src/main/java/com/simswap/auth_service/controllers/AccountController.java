@@ -27,7 +27,7 @@ public class AccountController {
             @Valid @RequestBody DeleteAccountRequest request,
             Authentication authentication) {
         String email = authentication.getName();
-        log.warn("Demande de suppression de compte pour : {}", email);
+        log.warn("Demande de suppression de compte pour: {}", email);
         
         accountService.deleteAccount(email, request.getPassword());
         
