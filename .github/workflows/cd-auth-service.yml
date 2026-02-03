@@ -52,6 +52,9 @@ jobs:
 
     call-reusable-cd:
         needs: prepare
+        permissions:
+            contents: read
+            packages: write
         uses: ./.github/workflows/reusable-cd.yml
         with:
             service: 'auth-service'
