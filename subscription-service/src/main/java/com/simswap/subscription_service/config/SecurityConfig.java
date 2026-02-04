@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity
 public class SecurityConfig {
     private static final String[] WHITE_LIST_URL = {"/api/v1/subscriptions/**",
+            "/api/v1/invoices/**",
+            "/api/v1/invoices",
             "/subscription-service/v3/api-docs",
             "/v2/api-docs",
             "/v3/api-docs",

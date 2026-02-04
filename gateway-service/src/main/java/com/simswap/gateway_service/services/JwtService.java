@@ -28,6 +28,10 @@ public class JwtService {
 	    return extractClaim(token, Claims::getSubject);
 	}
 	
+	public String extractAuthUserId(String token) {
+	    return extractClaim(token, claims -> claims.get("authUserId", String.class));
+	}
+	
 	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
 	    final Claims claims = extractAllClaims(token);
 	    return claimsResolver.apply(claims);
@@ -79,17 +83,18 @@ public class JwtService {
     }
 	
 	@SuppressWarnings("unchecked")
-    public List<String> extractRoles(String token) {
-        Claims claims = extractAllClaims(token);
-        Object rolesObj = claims.get("roles");
-        
-        if (rolesObj instanceof List) {
-            return (List<String>) rolesObj;
-        }
-        
-        log.warn("Aucun rôle trouvé dans le token JWT, retour d'une liste vide");
-        return List.of();
-    }
+	public List<String> extractRoles(String token) {
+	    Claims claims = extractAllClaims(token);
+	    Object rolesObj = claims.get("role"); 
+	    
+	    if (rolesObj instanceof String) {
+	        return List.of((String) rolesObj);
+	    } else if (rolesObj instanceof List) {
+	        return (List<String>) rolesObj;
+	    }
+	    
+	    return List.of();
+	}
 	
 	private boolean isTokenExpired(String token) {
 		return extractExpiration(token).before(new Date());

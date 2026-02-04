@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,9 +25,8 @@ public class AccountController {
     
     @DeleteMapping("/delete-account")
     public ResponseEntity<ApiResponse<Void>> deleteAccount(
-            @Valid @RequestBody DeleteAccountRequest request,
-            Authentication authentication) {
-        String email = authentication.getName();
+            @RequestHeader("X-User-Email") String email,
+            @Valid @RequestBody DeleteAccountRequest request) {
         log.warn("Demande de suppression de compte pour : {}", email);
         
         accountService.deleteAccount(email, request.getPassword());

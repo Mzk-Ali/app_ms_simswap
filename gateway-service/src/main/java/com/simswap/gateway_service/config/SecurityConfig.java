@@ -46,6 +46,10 @@ public class SecurityConfig {
                     	).permitAll()
                         .pathMatchers("/api/v1/auth/logout").authenticated()
                         .pathMatchers("/api/v1/subscriptions/**").permitAll()
+                        .pathMatchers(
+                                "/api/v1/invoices/**",
+                                "/api/v1/invoices"
+                            ).permitAll()
                         .anyExchange().authenticated()
                 )
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())

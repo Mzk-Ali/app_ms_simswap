@@ -208,8 +208,7 @@ public class AuthService {
         log.info("Dernière connexion mise à jour pour {} !", user.getEmail());
         
         Session session = sessionRepository
-        		.findByUserAndDeviceName(user, request.getDeviceName())
-        		.filter(s -> !s.isRevoked())
+        		.findFirstByUserAndDeviceNameAndIsRevokedFalseOrderByLastUsedAtDesc(user, request.getDeviceName())
         		.orElse(Session.builder()
 		        		.user(user)
 		        		.deviceName(request.getDeviceName())

@@ -31,4 +31,6 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
      * Supprime toutes les sessions expirées (optionnel, utile pour un batch cleanup)
      */
     void deleteByExpiresAtBefore(java.time.LocalDateTime dateTime);
+    
+    Optional<Session> findFirstByUserAndDeviceNameAndIsRevokedFalseOrderByLastUsedAtDesc(User user, String deviceName);
 }

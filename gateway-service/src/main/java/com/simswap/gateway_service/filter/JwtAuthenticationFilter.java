@@ -83,6 +83,7 @@ public class JwtAuthenticationFilter implements WebFilter {
             
             // Extract user information
             String username = jwtService.extractUsername(token);
+            String authUserId = jwtService.extractAuthUserId(token);
             List<String> roles = jwtService.extractRoles(token);
             
             log.info("Authentification réussie - User: {}, Roles: {}, Path: {}", username, roles, path);
@@ -103,7 +104,8 @@ public class JwtAuthenticationFilter implements WebFilter {
             SecurityContext securityContext = new SecurityContextImpl(authentication);
             
             ServerWebExchange mutatedExchange = exchange.mutate()
-                    .request(builder -> builder.header("X-User-Email", username))
+                    .request(builder -> builder.header("X-User-Email", username)
+                            .header("X-Auth-User-Id", authUserId))
                     .build();
 
             return chain.filter(mutatedExchange)

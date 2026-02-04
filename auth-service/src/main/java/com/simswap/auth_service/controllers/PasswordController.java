@@ -3,6 +3,7 @@ package com.simswap.auth_service.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,8 +62,8 @@ public class PasswordController {
 	            - Nécessite que l'utilisateur soit déjà authentifié (authUserId fourni par le frontend)
 	    """
 	)
-	public ResponseEntity<ApiResponse<Void>> changePassword(@RequestBody ChangePasswordRequest request) {
-	    ApiResponse<Void> response = passwordService.changePassword(request);
+	public ResponseEntity<ApiResponse<Void>> changePassword(@RequestHeader("X-User-Email") String email, @RequestBody ChangePasswordRequest request) {
+	    ApiResponse<Void> response = passwordService.changePassword(email, request);
 	    return ResponseEntity.status(response.getStatus()).body(response);
 	}
 	

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.simswap.subscription_service.dtos.ApiResponse;
@@ -11,6 +12,7 @@ import com.simswap.subscription_service.dtos.CheckoutSessionRequest;
 import com.simswap.subscription_service.dtos.CheckoutSessionResponse;
 import com.simswap.subscription_service.dtos.SubscribeRequest;
 import com.simswap.subscription_service.dtos.SubscribeResponse;
+import com.simswap.subscription_service.dtos.SubscriptionPlanResponse;
 import com.simswap.subscription_service.dtos.SubscriptionValidationResponse;
 import com.simswap.subscription_service.dtos.UserSubscriptionResponse;
 import com.simswap.subscription_service.entities.SubscriptionPlan;
@@ -35,20 +37,45 @@ public class UserSubscriptionService {
 
     
     public ApiResponse<UserSubscriptionResponse> getActiveSubscription(String userId) {
-        UserSubscription subscription = subscriptionRepository
-                .findActiveSubscriptionByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Aucun abonnement actif trouvé pour cet utilisateur"));
-        
-        UserSubscriptionResponse response = UserSubscriptionResponse.builder()
-                .status(subscription.getStatus().name())
-                .build();
+        return subscriptionRepository.findActiveSubscriptionByUserId(userId)
+            .map(sub -> {
+                SubscriptionPlan planEntity = sub.getPlan();
+                SubscriptionPlanResponse planDto = SubscriptionPlanResponse.builder()
+                        .id(planEntity.getId())
+                        .name(planEntity.getName())
+                        .code(planEntity.getCode())
+                        .price(planEntity.getPriceAmount())
+                        .currency(planEntity.getCurrency())
+                        .simswapLimit(planEntity.getSimswapLimit())
+                        .build();
 
-        return ApiResponse.<UserSubscriptionResponse>builder()
-                .status(200)
-                .success(true)
-                .message("Abonnement actif récupéré avec succès")
-                .data(response)
-                .build();
+                UserSubscriptionResponse data = UserSubscriptionResponse.builder()
+                        .id(String.valueOf(sub.getId()))
+                        .userId(sub.getUserId())
+                        .status(sub.getStatus().name())
+                        .plan(planDto)
+                        .currentPeriodStart(sub.getCurrentPeriodStart())
+                        .currentPeriodEnd(sub.getCurrentPeriodEnd())
+                        .cancelAtPeriodEnd(sub.getCancelAtPeriodEnd())
+                        .stripeSubscriptionId(sub.getStripeSubscriptionId())
+                        .createdAt(sub.getCreatedAt())
+                        .build();
+
+                return ApiResponse.<UserSubscriptionResponse>builder()
+                        .status(200)
+                        .success(true)
+                        .message("Abonnement actif trouvé")
+                        .data(data)
+                        .build();
+            })
+            .orElseGet(() -> {
+                return ApiResponse.<UserSubscriptionResponse>builder()
+                        .status(200)
+                        .success(true)
+                        .message("Aucun abonnement actif trouvé")
+                        .data(null)
+                        .build();
+            });
     }
     
     public ApiResponse<SubscribeResponse> subscribe(String email, SubscribeRequest request) {

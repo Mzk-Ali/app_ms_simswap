@@ -51,7 +51,7 @@ public class PasswordService {
      * 3. Vérifie que l'ancien mot de passe fourni est correct.
      * 4. Encode et met à jour le mot de passe dans la base de données.
      */
-	public ApiResponse<Void> changePassword(ChangePasswordRequest request) {
+	public ApiResponse<Void> changePassword(String email, ChangePasswordRequest request) {
 		log.info("Début de la demande de changement de mot de passe pour l'utilisateur ID : {}", request.getAuthUserId());
 		
 		// Vérifie les nouveaux mots de passe
@@ -61,9 +61,9 @@ public class PasswordService {
         }
         
         // Récupère l'utilisateur
-		User user = userRepository.findByAuthUserId(request.getAuthUserId())
+		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> {
-					log.warn("Aucun utilisateur trouvé pour l'utilisateur ID : {}", request.getAuthUserId());
+					log.warn("Aucun utilisateur trouvé pour l'utilisateur : {}", email);
 					return new IllegalArgumentException("Utilisateur introuvable");
 				});
 		log.debug("Utilisateur trouvé : {}", user.getEmail());

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.simswap.auth_service.entities.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -35,8 +37,11 @@ public class JwtService {
 	    return claimsResolver.apply(claims);
 	}
 	
-	public String generateToken(UserDetails userDetails) {
-	    return generateToken(new HashMap<>(), userDetails);
+	public String generateToken(User user) {
+	    Map<String, Object> extraClaims = new HashMap<>();
+	    extraClaims.put("authUserId", user.getAuthUserId());
+	    extraClaims.put("role", user.getRole().name());
+	    return generateToken(extraClaims, user);
 	}
 
 	public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {

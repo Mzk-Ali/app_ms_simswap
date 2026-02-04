@@ -149,6 +149,15 @@ spring:
               args:
                 name: SubscriptionServiceCircuitBreaker
                 fallbackUri: forward:/fallback/subscription
+        - id: invoice_service_route
+          uri: lb://subscription-service
+          predicates:
+            - Path=/api/v1/invoices, /api/v1/invoices/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: SubscriptionServiceCircuitBreaker
+                fallbackUri: forward:/fallback/subscription
         - id: sub_docs
           uri: lb://subscription-service
           predicates:
