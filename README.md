@@ -17,11 +17,10 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![Unlicense License][license-shield]][license-url]
+[![Build Status](https://img.shields.io/badge/Build-Passing-success?style=for-the-badge&logo=github-actions)](https://github.com/Mzk-Ali/app_ms_simswap/actions)
+[![Docker Image](https://img.shields.io/badge/Container-GHCR-blue?style=for-the-badge&logo=docker)](https://github.com/Mzk-Ali/app_ms_simswap/pkgs/container/app_ms_simswap)
+[![Java Version](https://img.shields.io/badge/Java-25-vert?style=for-the-badge&logo=openjdk)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring--Boot-3.5.x-6DB33F?style=for-the-badge&logo=springboot)](https://spring.io/projects/spring-boot)
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
@@ -34,32 +33,37 @@
   </a>
 
   <h3 align="center">Backend FaceSwap MicroService</h3>
+
+  <p align="center">
+    Une solution robuste de permutation de visages propulsée par l'IA.
+    <br />
+    <a href="https://github.com/Mzk-Ali/app_ms_simswap"><strong>Explorer la doc. API</strong></a>
+  </p>
 </div>
 
 
 
 <!-- TABLE OF CONTENTS -->
 <details>
-  <summary>Table of Contents</summary>
+  <summary>Table des matières</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
+      <a href="#a-propos-du-projet">À propos du projet</a>
       <ul>
-        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#build-avec">Build avec</a></li>
       </ul>
     </li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+      <a href="#commencons">Commençons</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#pré-requis">Pré-requis</a></li>
+        <li><a href="#installation">Installation & Lancement</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#usage">Utilisation</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#license">License</a></li>
+    <li><a href="#license">DevOps</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -68,18 +72,14 @@
 <!-- ABOUT THE PROJECT -->
 ## A propos du project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+Ce dépôt contient le **microservice Backend** de l'écosystème **FaceSwap**. Il s'agit du moteur central chargé de traiter les requêtes de transformation d'images via des modèles d'Intelligence Artificielle.
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+L'architecture repose sur **Spring Boot** pour la logique métier et utilise une approche asynchrone pour garantir la réactivité du système, même lors de traitements lourds.
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
-
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
-
-Use the `BLANK_README.md` to get started.
+**Points forts :**
+* **Scalabilité :** Déployement facile via Docker.
+* **Fiabilité :** Gestion des files d'attente pour ne perdre aucune requête.
+* **Observabilité :** Monitoring intégré avec la Stack "Grafana Observability" pour suivre les performances de l'API .
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -87,14 +87,13 @@ Use the `BLANK_README.md` to get started.
 
 ### Build avec
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
 * [![Spring][Spring]][Spring-url]
 * [![Postgre][Postgre]][Postgre-url]
 * [![RabbitMq][RabbitMq]][RabbitMq-url]
 * [![Prometheus][Prometheus]][Prometheus-url]
 * [![Grafana][Grafana]][Grafana-url]
 * [![Swagger][Swagger]][Swagger-url]
+* [![Postman][Postman]][Postman-url]
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -104,38 +103,37 @@ This section should list any major frameworks/libraries used to bootstrap your p
 <!-- GETTING STARTED -->
 ## Commencons ...
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+Suivez ces instructions pour configurer le projet dans votre environnement de développement local.
 
 ### Pré-requis
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+* **Docker & Docker Compose avec Docker Desktop sur Windows** (recommandé)
+* **Maven** (pour compiler le `.jar` si vous n'utilisez pas Docker)
+* **Java 25**
 
-### Installation
+### Installation & Lancement
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+Il s'agit du lancement de l'application via l'utilisation de Docker 
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Cloner le projet
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone [https://github.com/Mzk-Ali/app_ms_simswap.git](https://github.com/Mzk-Ali/app_ms_simswap.git)
+   cd app_ms_simswap
    ```
-3. Install NPM packages
+2. Configuration de l'environnement
    ```sh
-   npm install
+   cp .env.example .env
    ```
-4. Enter your API in `config.js`
+   Editez le fichier .env pour configurer les accès (DataBase, RabbitMQ, Ports, SMTP)
+3. Lancement des outils de monitoring
+   ```sh
+   cd .\monitoring\
+   docker-compose up -d
+   cd ..
+   ```
+4. Lancement de l'application (API)
    ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
+   docker-compose up -d --build
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -143,11 +141,14 @@ _Below is an example of how you can instruct your audience on installing and set
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
+## Utilisation (OpenAPI)
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Le microservice utilise Swagger / OpenAPI pour documenter et tester les points de terminaison.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+Une fois l'application lancée, accédez à la documentation interactive ici :
+http://localhost:8888/swagger-ui.html
+
+Vous y trouverez les schémas de données et pourrez tester les appels API directement depuis votre navigateur.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -169,14 +170,27 @@ See the [open issues](https://github.com/othneildrew/Best-README-Template/issues
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+<!-- DEVOPS -->
+## DevOps & Architecture Industrielle
 
-<!-- LICENSE -->
-## License
+###  Gestion des Artefacts & Images
+Plutôt que de compiler le code localement, le projet utilise **GHCR (GitHub Container Registry)** comme registre central :
+* **Images Docker Optimisées** : Les images sont construites, taguées et stockées sur le GHCR pour garantir des déploiements reproductibles.
+* **Pulling Ready** : Vous pouvez déployer l'application sans même avoir le code source en local via `docker pull ghcr.io/mzk-ali/app_ms_simswap`.
 
-Distributed under the Unlicense License. See `LICENSE.txt` for more information.
+###  CI/CD Workflow
+Le workflow GitHub Actions automatise les étapes suivantes à chaque push sur la branche `main` :
+1. **Compilation & Tests** : Validation du code avec Maven et Java 25.
+2. **Dockerization** : Création de l'image Docker du microservice.
+3. **Push GHCR** : Publication automatique de l'image mise à jour sur le registre GitHub.
+
+###  Observabilité & Monitoring
+Le projet intègre une stack complète pour surveiller la santé du microservice en temps réel :
+* **Prometheus** : Collecte des métriques d'application (CPU, RAM, requêtes API).
+* **Grafana** : Visualisation via des dashboards personnalisés pour suivre les performances du moteur de FaceSwap.
+* **Loki & Tempo** : Centralisation des logs et tracage des requêtes
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- CONTACT -->
@@ -190,38 +204,11 @@ Project Link: [https://github.com/Mzk-Ali/app_ms_simswap](https://github.com/Mzk
 
 
 
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
+[linkedin-url]: https://www.linkedin.com/in/ali-marzak-4ab4c4/
 [product-screenshot]: images/screenshot.png
 [Spring]: https://img.shields.io/badge/springBoot-000000?style=for-the-badge&logo=spring&logoColor=6DB33F
 [Spring-url]: https://spring.io/
@@ -237,3 +224,5 @@ Use this space to list resources you find helpful and would like to give credit 
 [Grafana-url]: https://grafana.com/
 [Swagger]: https://img.shields.io/badge/Swagger-000000?style=for-the-badge&logo=swagger&logoColor=85EA2D
 [Swagger-url]: https://swagger.io/
+[Postman]: https://img.shields.io/badge/Postman-000000?style=for-the-badge&logo=postman&logoColor=FF6C37
+[Postman-url]: https://www.postman.com/
