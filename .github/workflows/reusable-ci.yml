@@ -17,6 +17,8 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
             - name: Set up JDK 25
               uses: actions/setup-java@v4
@@ -41,8 +43,10 @@ jobs:
                     --file pom.xml \
                     -DskipTests \
                     -Dsonar.projectKey=Mzk-Ali_app_ms_simswap \
+                    -Dsonar.organization=mzk-ali \
                     -Dsonar.host.url=https://sonarcloud.io \
-                    -Dsonar.token=$SONAR_TOKEN
+                    -Dsonar.token=$SONAR_TOKEN \
+                    -Dsonar.qualitygate.wait=false
             - name: Build and Test Service
               run: |
                 cd ${{ inputs.service-path }}
