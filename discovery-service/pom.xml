@@ -31,6 +31,7 @@
         <sonar.organization>mzk-ali</sonar.organization>
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
 	</properties>
+    
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
