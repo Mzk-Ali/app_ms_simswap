@@ -44,7 +44,7 @@ public class FallbackController {
                 .status(HttpStatus.SERVICE_UNAVAILABLE.value())
                 .error(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase())
                 .code("SERVICE_UNAVAILABLE")
-                .message("Le service d'authentification est temporairement indisponible. Veuillez réessayer dans quelques instants.")
+                .message("Le service d'authentification est temporairement indisponible.  Veuillez réessayer dans quelques instants.")
                 .traceId(null)
                 .service("auth-service")
                 .path("/fallback/auth")
