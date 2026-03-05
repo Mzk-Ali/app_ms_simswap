@@ -1,8 +1,8 @@
-name: CD Auth Service
+name: CD Email Service
 
 on:
     workflow_run:
-        workflows: ["CI Auth Service"]
+        workflows: ["CI Email Service"]
         types:
             - completed
 
@@ -57,7 +57,7 @@ jobs:
             packages: write
         uses: ./.github/workflows/reusable-cd.yml
         with:
-            service: 'auth-service'
+            service: 'email-service'
             image-tag: ${{ needs.prepare.outputs.image_tag }}
             latest-tag: ${{ needs.prepare.outputs.latest_tag }}
             ref: ${{ github.event.workflow_run.head_sha }}
