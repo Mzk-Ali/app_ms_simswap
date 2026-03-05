@@ -38,7 +38,7 @@ public class EmailService {
     @RabbitListener(queues = "${rabbitmq.queue.email.name}")
     public void processEmailMessage(EmailRequest emailRequest) {
         try {
-            log.info("Traitement de l'email pour: {}", emailRequest.getTo());
+            log.info("Traitement de l'email pour: {} ", emailRequest.getTo());
             String to = emailRequest.getTo();
             String subject = emailRequest.getSubject();
             String body = generateEmailBody(emailRequest);
