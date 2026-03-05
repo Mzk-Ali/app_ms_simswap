@@ -1,0 +1,17 @@
+name: CI Email Service
+
+on:
+    push:
+        paths:
+            - 'email-service/**'
+    pull_request:
+        paths:
+            - 'email-service/**'
+
+jobs:
+    ci:
+        uses: ./.github/workflows/reusable-ci.yml
+        with:
+            service-path: 'email-service'
+        secrets:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

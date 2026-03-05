@@ -1,0 +1,17 @@
+name: CI Gateway Service
+
+on:
+    push:
+        paths:
+            - 'gateway-service/**'
+    pull_request:
+        paths:
+            - 'gateway-service/**'
+
+jobs:
+    ci:
+        uses: ./.github/workflows/reusable-ci.yml
+        with:
+            service-path: 'gateway-service'
+        secrets:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

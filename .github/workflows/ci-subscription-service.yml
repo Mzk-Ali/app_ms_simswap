@@ -1,0 +1,17 @@
+name: CI Subscription Service
+
+on:
+    push:
+        paths:
+            - 'subscription-service/**'
+    pull_request:
+        paths:
+            - 'subscription-service/**'
+
+jobs:
+    ci:
+        uses: ./.github/workflows/reusable-ci.yml
+        with:
+            service-path: 'subscription-service'
+        secrets:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -24,6 +24,16 @@
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
+<br />
+
+| Service | Pipeline CI (Tests) | Pipeline CD (Docker) | Image Registre (GHCR) |
+| :--- | :---: | :---: | :---: |
+| **Discovery** | [![CI Discovery](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/ci-discovery-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![CD Discovery](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/cd-discovery-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![Docker](https://img.shields.io/badge/Pull-Discovery-blue?logo=docker&logoColor=white)](https://github.com/Mzk-Ali/app_ms_simswap/pkgs/container/discovery-service) |
+| **Gateway** | [![CI Gateway](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/ci-gateway-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![CD Gateway](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/cd-gateway-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![Docker](https://img.shields.io/badge/Pull-Gateway-blue?logo=docker&logoColor=white)](https://github.com/Mzk-Ali/app_ms_simswap/pkgs/container/gateway-service) |
+| **Auth** | [![CI Auth](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/ci-auth-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![CD Auth](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/cd-auth-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![Docker](https://img.shields.io/badge/Pull-Auth-blue?logo=docker&logoColor=white)](https://github.com/Mzk-Ali/app_ms_simswap/pkgs/container/auth-service) |
+| **Subscription** | [![CI Sub](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/ci-subscription-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![CD Sub](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/cd-subscription-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![Docker](https://img.shields.io/badge/Pull-Subscription-blue?logo=docker&logoColor=white)](https://github.com/Mzk-Ali/app_ms_simswap/pkgs/container/subscription-service) |
+| **Email** | [![CI Email](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/ci-email-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![CD Email](https://github.com/Mzk-Ali/app_ms_simswap/actions/workflows/cd-email-service.yml/badge.svg)](https://github.com/Mzk-Ali/app_ms_simswap/actions) | [![Docker](https://img.shields.io/badge/Pull-Email-blue?logo=docker&logoColor=white)](https://github.com/Mzk-Ali/app_ms_simswap/pkgs/container/email-service) |
+| **AI Manager** | ![CI Pending](https://img.shields.io/badge/CI-En_développement-orange) | ![CD Pending](https://img.shields.io/badge/CD-En_attente-lightgrey) | ![Static Badge](https://img.shields.io/badge/Docker-AI_Manager-grey?logo=docker) |
 
 <!-- PROJECT LOGO -->
 <br />
@@ -157,15 +167,25 @@ Vous y trouverez les schémas de données et pourrez tester les appels API direc
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
+- Core Infrastructure & Sécurité (Terminé)
+  - [x] Auth-Service : Gestion complète JWT (Access & Refresh Tokens).
+  - [x] Sécurité Utilisateur : Flux de changement et récupération de mot de passe.
+  - [x] Subscription-Service : Gestion des abonnements et des plans utilisateurs.
+  - [x] Email-Service : Système de notifications asynchrones via RabbitMQ.
+  - [x] Discovery & Gateway : Routage centralisé et enregistrement via Eureka.
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+
+- Monitoring & DevOps (Terminé)
+  - [x] Observability: Implementation de Loki et Tempo.
+  - [x] Monitoring: Dashboard avec Prometheus & Grafana pour surveiller les services.
+  - [x] **Pipelines CI/CD** : Workflows CD réutilisables avec scan de sécurité Trivy et publication GHCR.
+
+
+- Intelligence Artificielle & Traitement (En cours)
+  - [ ] AI-Manager-Service : Contrôle des quotas en temps réel basé sur l'abonnement + Suivi du statut des traitements (En attente / En cours / Terminé).
+  - [ ] AI-Processing-Service : Intégration des modèles de Deep Learning pour le FaceSwap.
+  - [ ] Stockage Cloud : Intégration S3 pour la persistance des rendus images.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
