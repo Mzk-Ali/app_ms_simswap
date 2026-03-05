@@ -22,7 +22,7 @@ public class PaymentService {
     
     public ApiResponse<String> getInvoiceUrl(String paymentId) {
         Payment payment = paymentRepository.findById(Long.valueOf(paymentId))
-                .orElseThrow(() -> new IllegalArgumentException("Paiement non trouvé"));
+                .orElseThrow(() -> new IllegalArgumentException("Paiement non trouvé."));
 
         if (payment.getStripeInvoiceUrl() != null) {
             return ApiResponse.<String>builder()
