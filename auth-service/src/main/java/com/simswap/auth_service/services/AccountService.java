@@ -21,7 +21,7 @@ public class AccountService {
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
         
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("Mot de passe incorrect");
+            throw new IllegalArgumentException("Mot de passe incorrect ");
         }
         
         userRepository.delete(user);
