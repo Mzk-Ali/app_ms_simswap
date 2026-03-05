@@ -182,7 +182,7 @@ Vous y trouverez les schémas de données et pourrez tester les appels API direc
 
 
 - Intelligence Artificielle & Traitement (En cours)
-  - [ ] AI-Manager-Service : Contrôle des quotas en temps réel basé sur l'abonnement + Suivi du statut des traitements (En attente / En cours / Terminé).
+  - [ ] AI-Manager-Service : Contrôle des quotas en temps réel basé sur l'abonnement + Suivi du statut des traitements.
   - [ ] AI-Processing-Service : Intégration des modèles de Deep Learning pour le FaceSwap.
   - [ ] Stockage Cloud : Intégration S3 pour la persistance des rendus images.
 
